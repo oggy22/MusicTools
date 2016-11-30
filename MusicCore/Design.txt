@@ -1,0 +1,34 @@
+﻿***************************************
+Version1:
+class Scale7Tone
+{
+	private int tone7;
+	public operator+=(Scale7Tone)
+}
+
+class Scale7Interval : Scale7Tones
+{
+}
+
+****************************************
+Version2:
+class Scale7Interval
+{
+	private int tone7;
+	p
+}
+
+class Scale7Tone : Scale7Interval
+{
+
+}
+
+class FullTone : Scale7Tone
+{
+	private int tone12;
+}
+
+class FullInterval : FullTone
+{
+	operator
+}
