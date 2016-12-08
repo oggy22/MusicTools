@@ -25,34 +25,12 @@ namespace MusicCore
 
         public override Fraction Duration => new Fraction(rhythm.Length, 1);
 
-        public override IEnumerable<Tuple<Note, Fraction>> NotesOld()
-        {
-            if (rhythm == null)
-            {
-                //TODO
-                yield break;
-            }
-
-            int i = 0;
-            foreach (var fract in rhythm.Notes())
-            {
-                Note note = notes[i] is Note ? (Note)notes[i] : new Note() { note = (int)(notes[i]) };
-                yield return new Tuple<Note, Fraction>((Note)(note), fract);
-                i++;
-            }
-            Debug.Assert(i == notes.Length);
-        }
-
         public override IEnumerable<NoteWithDuration> Notes()
         {
             int i = 0;
             foreach (var fract in rhythm.Notes())
             {
-                yield return new NoteWithDuration()
-                {
-                    note = (int)notes[i],
-                    duration = fract
-                };
+                yield return new NoteWithDuration((int)notes[i], fract);
                 i++;
             }
         }

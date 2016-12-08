@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace MusicCore
 {
@@ -17,11 +18,8 @@ namespace MusicCore
 
         public override Fraction StartPause => components[0].melody.StartPause;
 
-        public override IEnumerable<NoteWithDuration> Anacrusis => components[0].melody.Anacrusis.Select(nwd => new NoteWithDuration()
-        {
-            note = nwd.note + components[0].alteration,
-            duration = nwd.duration
-        });
+        public override IEnumerable<NoteWithDuration> Anacrusis => components[0].melody.Anacrusis.Select(
+            nwd => new NoteWithDuration(nwd.note + components[0].alteration, nwd.duration));
 
         public override Fraction Duration
         {
@@ -34,23 +32,12 @@ namespace MusicCore
             }
         }
 
-        public override IEnumerable<Tuple<Note, Fraction>> NotesOld()
-        {
-            foreach (var component in components)
-                foreach (var tuple in component.melody.NotesOld())
-                {
-                    Note note = tuple.Item1;
-                    note.note += component.alteration;
-                    yield return new Tuple<Note, Fraction>(note, tuple.Item2);
-                }
-        }
-
         public override IEnumerable<NoteWithDuration> Notes()
         {
             List<NoteWithDuration> current = new List<NoteWithDuration>();
             foreach (var component in components)
             {
-                Fraction fractSum = component.melody.Duration - component.melody.StartPause;
+                Fraction fractSum = component.melody.Duration;
                 foreach (var nwd in component.melody.Anacrusis)
                     fractSum = fractSum - nwd.duration;
 
@@ -62,7 +49,7 @@ namespace MusicCore
                     {
                         Fraction dur = nwd.duration + fractSum;
                         Debug.Assert(dur.p > 0);
-                        yield return new NoteWithDuration() { note = nwd.note, duration = dur };
+                        yield return new NoteWithDuration(nwd.note, dur);
                         break;
                     }
                     yield return nwd;
@@ -70,22 +57,16 @@ namespace MusicCore
                         break;
                 }
                 foreach (var nwd in component.melody.Anacrusis)
-                    yield return nwd;
+                    yield return new NoteWithDuration(nwd.note + component.alteration, nwd.duration);
 
                 current = new List<NoteWithDuration>();
 
                 if (component.melody.StartPause.p != 0)
-                {
-                    yield return NoteWithDuration.MakePause(component.melody.StartPause);
-                }
+                    current.Add(NoteWithDuration.MakePause(component.melody.StartPause));
 
                 foreach (var nwd in component.melody.Notes())
                 {
-                    current.Add(new NoteWithDuration()
-                    {
-                        note = nwd.note + component.alteration,
-                        duration = nwd.duration
-                    });
+                    current.Add(new NoteWithDuration(nwd.note + component.alteration, nwd.duration));
                 }
             }
 
@@ -120,6 +101,24 @@ namespace MusicCore
                 }
                 throw new ArgumentException($"Unexpected symbol {st[i]}");
             }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            Dictionary<MelodyBase, char> dict = new Dictionary<MelodyBase, char>();
+            dict[components[0].melody] = 'A';
+
+            foreach (var component in components)
+            {
+                if (!dict.ContainsKey(component.melody))
+                    dict.Add(component.melody, (char)(dict.Values.Max() + (char)(1)));
+
+                sb.Append(dict[component.melody]);
+                int alt = component.alteration;
+                sb.Append(new string(alt > 0 ? '+' : '-', Math.Abs(alt)));
+            }
+            return sb.ToString();
         }
     }
 }

@@ -32,24 +32,7 @@ namespace MusicCore
         {
             foreach (var notewd in melodyBase.Notes())
             {
-                yield return new NoteWithDuration()
-                {
-                    note = notewd.IsPause ? Note.PAUSE : key + toneset.Calculate(notewd.note),
-                    duration = notewd.duration
-                };
-            }
-        }
-
-        public override IEnumerable<Tuple<Note, Fraction>> NotesOld()
-        {
-            foreach (var tuple in melodyBase.NotesOld())
-            {
-                Note note = new Note()
-                {
-                    note = key + toneset.Calculate(tuple.Item1.note)
-                };
-
-                yield return new Tuple<Note, Fraction>(note, tuple.Item2);
+                yield return new NoteWithDuration(notewd.IsPause ? Note.PAUSE : key + toneset.Calculate(notewd.note), notewd.duration);
             }
         }
     }

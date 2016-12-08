@@ -53,6 +53,8 @@
     <Compile Include="Melody\MelodyAtomic.cs" />
     <Compile Include="Melody\MelodyBase.cs" />
     <Compile Include="Melody\MelodyComposite.cs" />
+    <Compile Include="Melody\MelodyDiffEnd.cs" />
+    <Compile Include="Melody\MelodyReversed.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rhythm\RhythmComposite.cs" />

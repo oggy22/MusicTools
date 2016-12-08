@@ -1,16 +1,19 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace MusicCore
 {
     public struct Fraction
     {
+        static public readonly Fraction ZERO = new Fraction(0, 1);
+
         public int p { get; }
         public int q { get; }
 
         public Fraction(int p, int q)
         {
             Debug.Assert(q > 0);
-            int gcd = GCD(p, q);
+            int gcd = GCD(Math.Abs(p), q);
             this.p = p / gcd;
             this.q = q / gcd;
         }

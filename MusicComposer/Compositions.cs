@@ -23,9 +23,17 @@ namespace MusicComposer
 
         public static Melody12Tone MrSandman()
         {
-            RhythmPattern r = new RhythmPattern(4, 2, "hhhh2");
-            MelodyBase melody = new MelodyAtomic(r, new object[] { 0, 2, 4, 6, 5 });
-            MelodyComposite melodyComp = new MelodyComposite("AA+", melody);
+            MelodyBase melody = new MelodyAtomic(new object[] { 0, 2, 4, 6 }, 2);
+            var melody2 = new MelodyReversed(new MelodyDiffEnd(melody, new[] { new NoteWithDuration(5, new Fraction(1, 2)) }));
+            MelodyComposite melodyComp = new MelodyComposite("ABA+", melody, melody2);
+            Melody12Tone m12tone = new Melody12Tone(melodyComp, MusicalModes.Major, 64);
+            return m12tone;
+        }
+
+        public static object Pratnja()
+        {
+            MelodyBase melody = new MelodyAtomic(new object[] { 0, 2 }, 2);
+            MelodyComposite melodyComp = new MelodyComposite("A A1 A2 Ar1", melody);
             Melody12Tone m12tone = new Melody12Tone(melodyComp, MusicalModes.Major, 64);
             return m12tone;
         }
@@ -45,9 +53,9 @@ namespace MusicComposer
             MelodyAtomic melodyEnd = new MelodyAtomic(new object[] { 1, null, null, 2, 1, null, 0, null }, 4);
             melodyEnd.anacrusis = new List<NoteWithDuration>()
             {
-                new NoteWithDuration() { note = 4, duration = new Fraction(1, 2) }
+                new NoteWithDuration(2, new Fraction(1, 2))
             };
-            MelodyComposite melodyComp = new MelodyComposite("A--B", melodyCEGB, melodyEnd);
+            MelodyComposite melodyComp = new MelodyComposite("AA-A--B", melodyCEGB, melodyEnd);
             return new Melody12Tone(melodyComp, MusicalModes.Major, 64);
         }
 
@@ -56,11 +64,27 @@ namespace MusicComposer
             MelodyAtomic melody = new MelodyAtomic(new object[] { 2, null, 2, null, 2, null, 1, 0, 1, null, null, null}, 3);
             melody.anacrusis = new List<NoteWithDuration>()
             {
-                new NoteWithDuration() { note = 0, duration = new Fraction(1, 4) },
-                new NoteWithDuration() { note = 1, duration = new Fraction(1, 4) }
+                new NoteWithDuration(0, new Fraction(1, 4)),
+                new NoteWithDuration(1, new Fraction(1, 4))
             };
             MelodyComposite melodyComp = new MelodyComposite("AA+A++", melody);
             return new Melody12Tone(melodyComp, MusicalModes.Minor, 64);
+        }
+
+        public static Melody12Tone GMajorMenuet()
+        {
+            MelodyAtomic melody = new MelodyAtomic(new object[] { 0, 1, 2, 3, 4, 5, 6, 7 }, 4);
+            return new Melody12Tone(melody, MusicalModes.Major, 60);
+        }
+
+        public static Melody12Tone WeWishYouAMerryChristmas()
+        {
+            RhythmPattern rhythm = new RhythmPattern(3, 2, "1hhhh111");
+            MelodyAtomic melody = new MelodyAtomic(rhythm, new object[] { 0, 0, 1, 0, -1, -2, -4, -2 });
+            melody.anacrusis = new List<NoteWithDuration>() { new NoteWithDuration(-3, new Fraction(1, 1)) };
+            MelodyAtomic melody2 = new MelodyAtomic(new RhythmPattern(3, 2, "1113"), new object[] { -2, 1, -1, 0 });
+            MelodyComposite meloComp = new MelodyComposite("AA+A++B", melody, melody2);
+            return new Melody12Tone(meloComp, MusicalModes.Major, 65);
         }
     }
 }

@@ -71,12 +71,15 @@ namespace MusicComposer
 
         static void Main(string[] args)
         {
-            Melody12Tone m12tone = Compositions.Rach2ndSymphAdagio();
-            int tempo = 40;
+            Melody12Tone m12tone = Compositions.WeWishYouAMerryChristmas();
+            int tempo = 140;
+            int lastnote = 0;
             foreach (var nwd in m12tone.Notes())
             {
+                midiOut.Send(MidiMessage.StopNote(lastnote, 100, 1).RawData);
+
                 if (!nwd.IsPause)
-                    midiOut.Send(MidiMessage.StartNote(nwd.note, 100, 1).RawData);
+                    midiOut.Send(MidiMessage.StartNote(lastnote = nwd.note, 100, 1).RawData);
                 Fraction fract = nwd.duration;
                 Console.Write(fract + " ");
                 Thread.Sleep(60 * 1000 * fract.p / fract.q / tempo);
