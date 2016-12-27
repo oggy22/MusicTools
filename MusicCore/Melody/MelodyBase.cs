@@ -70,6 +70,11 @@ namespace MusicCore
     {
         public abstract IEnumerable<NoteWithDuration> Notes();
 
+        public virtual IEnumerable<NoteWithDuration> Notes(int[] coeffs)
+        {
+            throw new NotImplementedException();
+        }
+
         public abstract Fraction StartPause { get; }
 
         public abstract IEnumerable<NoteWithDuration> Anacrusis { get; }

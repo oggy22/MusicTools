@@ -23,7 +23,7 @@ namespace MusicComposer.Tests
         }
 
         [TestMethod]
-        [DataSource("MusicComposer.Tests.CompositionsTests.TestSource")]
+        [DataSource("MusicComposer.Tests.CompositionsTests." + nameof(TestSource))]
         public void Test()
         {
             var methodName = TestContext.GetRuntimeDataSourceObject<string>();

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicCore
 {
@@ -25,6 +22,10 @@ namespace MusicCore
         public override Fraction StartPause => Fraction.ZERO;
 
         public override IEnumerable<NoteWithDuration> Notes()
+        {
+            return melodyBase.Notes().Reverse();
+        }
+        public override IEnumerable<NoteWithDuration> Notes(int[] coeffs)
         {
             return melodyBase.Notes().Reverse();
         }

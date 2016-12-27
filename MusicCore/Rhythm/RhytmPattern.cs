@@ -27,7 +27,7 @@ namespace MusicCore
 
     public class RhythmPattern : RhythmPatternBase
     {
-        Dictionary<char, Fraction> dict = new Dictionary<char, Fraction>
+        static readonly Dictionary<char, Fraction> dict = new Dictionary<char, Fraction>
         {
             {'1', new Fraction(1, 1) },
             {'2', new Fraction(2, 1) },

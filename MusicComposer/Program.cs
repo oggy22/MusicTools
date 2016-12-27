@@ -71,7 +71,7 @@ namespace MusicComposer
 
         static void Main(string[] args)
         {
-            Melody12Tone m12tone = Compositions.WeWishYouAMerryChristmas();
+            Melody12Tone m12tone = Compositions.AnotherWhoopy();
             int tempo = 140;
             int lastnote = 0;
             foreach (var nwd in m12tone.Notes())

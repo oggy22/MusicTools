@@ -73,8 +73,18 @@ namespace MusicComposer
 
         public static Melody12Tone GMajorMenuet()
         {
-            MelodyAtomic melody = new MelodyAtomic(new object[] { 0, 1, 2, 3, 4, 5, 6, 7 }, 4);
-            return new Melody12Tone(melody, MusicalModes.Major, 60);
+            RhythmPattern rhythm = new RhythmPattern(3, 2, "1hhhh");
+            ParameterizedMelody pmelody = new ParameterizedMelody("0' 0 1 2 0", rhythm);
+            MelodyComposite mcomposote = new MelodyComposite("A(0,2) A(-3,1) A(-2,0)", pmelody);
+            return new Melody12Tone(mcomposote, MusicalModes.Major, 60);
+        }
+
+        public static Melody12Tone CSharpValseChopin()
+        {
+            RhythmPattern rhythm = new RhythmPattern(3, 2, "hhhhhh");
+            ParameterizedMelody pmelody = new ParameterizedMelody("0 1 0 -1 -3 0'", rhythm);
+            MelodyComposite mcomposite = new MelodyComposite("A(4,-3) A(3,-3) A(2,-4) A(1,-5)", pmelody);
+            return new Melody12Tone(mcomposite, MusicalModes.MinorHarmonic, 60);
         }
 
         public static Melody12Tone WeWishYouAMerryChristmas()
@@ -85,6 +95,20 @@ namespace MusicComposer
             MelodyAtomic melody2 = new MelodyAtomic(new RhythmPattern(3, 2, "1113"), new object[] { -2, 1, -1, 0 });
             MelodyComposite meloComp = new MelodyComposite("AA+A++B", melody, melody2);
             return new Melody12Tone(meloComp, MusicalModes.Major, 65);
+        }
+
+        public static Melody12Tone AnotherWhoopy()
+        {
+            MelodyAtomic melody = new MelodyAtomic(new RhythmPattern(4, 1, "4"), new object[] { 5 });
+            melody.anacrusis = new List<NoteWithDuration>()
+            {
+                new NoteWithDuration(0, new Fraction(1, 3)),
+                new NoteWithDuration(1, new Fraction(2, 3)),
+                new NoteWithDuration(0, new Fraction(1, 3)),
+            };
+
+            MelodyComposite mc = new MelodyComposite("AA", melody);
+            return new Melody12Tone(mc, MusicalModes.Major, 64);
         }
     }
 }
