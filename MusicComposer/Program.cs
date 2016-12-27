@@ -2,6 +2,7 @@
 using MusicCore;
 using NAudio.Midi;
 using System.Threading;
+using System.Reflection;
 
 namespace MusicComposer
 {
@@ -71,7 +72,22 @@ namespace MusicComposer
 
         static void Main(string[] args)
         {
-            Melody12Tone m12tone = Compositions.AnotherWhoopy();
+            if (args.Length < 1)
+            {
+                Console.WriteLine("Provide one of the following songs:");
+                foreach (MethodInfo mi in typeof(Compositions).GetMethods())
+                {
+                    if (mi.GetParameters().Length == 0 && mi.ReturnType == typeof(Melody12Tone))
+                        Console.Write(mi.Name + " ");
+                }
+                Console.WriteLine();
+                return;
+            }
+
+            MethodInfo miStatic = typeof(Compositions).GetMethod(args[0]);
+            Func<Melody12Tone> dgComposition = Delegate.CreateDelegate(typeof(Func<Melody12Tone>), miStatic) as Func<Melody12Tone>;
+            Melody12Tone m12tone = dgComposition();
+
             int tempo = 140;
             int lastnote = 0;
             foreach (var nwd in m12tone.Notes())
