@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,6 +8,7 @@ namespace MusicCore
 {
     public enum MusicalModes
     {
+        Chromatic = 0,
         Ionian = 1, Major = Ionian,
         Dorian = 2,
         Phrygian = 3,
@@ -17,8 +19,10 @@ namespace MusicCore
         MinorHarmonic,
         MinorMelodic
     }
-    public class TwelveToneSet
+
+    public class TwelveToneSet : IEnumerable<tone12>
     {
+        #region Constants
         public const int TWELVE = 12;
 
         private static readonly char SHARP = '#';
@@ -38,7 +42,20 @@ namespace MusicCore
         static public TwelveToneSet major7 = new TwelveToneSet("CEGB♭");
         static public TwelveToneSet minor7 = new TwelveToneSet("CE♭GB♭");
 
+        static public TwelveToneSet chromatic = new TwelveToneSet(MusicalModes.Chromatic);
+        #endregion
+
         private bool[] tones;
+
+        #region Properties
+        public bool IsRooted { get { return this[0]; } }
+
+        public int Count { get { return tones.Count(f => f); } }
+
+        public bool IsConst
+        {
+            get; private set;
+        }
 
         public bool this[int pos]
         {
@@ -46,21 +63,65 @@ namespace MusicCore
             {
                 return tones[pos];
             }
+            set
+            {
+                Debug.Assert(!IsConst);
+                tones[pos] = value;
+            }
         }
+
+        public tone12 First
+        {
+            get
+            {
+                for (int i = 0; i < TWELVE; i++)
+                    if (this[i])
+                        return i;
+
+                throw new Exception("Empty!");
+            }
+        }
+
+        public tone12 Last
+        {
+            get
+            {
+                for (int i = TWELVE - 1; i >= 0; i--)
+                    if (this[i])
+                        return i;
+
+                throw new Exception("Empty!");
+            }
+        }
+        #endregion
 
         #region Constructors
         public TwelveToneSet(bool[] tones)
         {
-            if (tones.Length > 12)
-                Debug.Fail($"Parameter tones.Length = {tones.Length}, but must not be larger than 12");
+            if (tones.Length > TWELVE)
+                Debug.Fail($"Parameter tones.Length = {tones.Length} must not be larger than {TWELVE}");
 
             tones = new bool[TWELVE];
             for (int i = 0; i < tones.Length; i++)
-                this.tones[i] = tones[i];
+                this[i] = tones[i];
         }
 
         public TwelveToneSet(MusicalModes mode) : this(majorScale)
         {
+            if (mode == MusicalModes.Chromatic)
+            {
+                for (int i = 0; i < TWELVE; i++)
+                    this[i] = true;
+                return;
+            }
+
+            if (mode >= MusicalModes.Dorian && mode <= MusicalModes.Locrian)
+            {
+                int shift = FindNth((int)mode - (int)MusicalModes.Ionian);
+                this.ShiftLeft(shift);
+                return;
+            }
+
             MusicalModes modeShift = mode;
             if (mode == MusicalModes.MinorHarmonic || mode == MusicalModes.MinorMelodic)
                 modeShift = MusicalModes.Minor;
@@ -80,22 +141,35 @@ namespace MusicCore
             }
         }
 
-        public void MakeSharp(int k)
+        private tone12 NextInScale(tone12 k, int steps=1)
         {
-            int n = FindNth(k);
-            tones[n] = false;
-            n = (n + 1) % TWELVE;
-            Debug.Assert(tones[n] == false);
-            tones[n] = true;
+            if (steps < 0)
+                return PreviousInScale(k, 0 - steps);
+
+            Debug.Assert(this[k]);
+            Debug.Assert(steps > 0);
+            do
+            {
+                k++;
+            } while (!this[k]);
+            return steps == 1 ? k : NextInScale(k, steps - 1);
         }
 
-        public void MakeFlat(int k)
+        private tone12 PreviousInScale(tone12 k, int steps=1)
         {
-            int n = FindNth(k);
-            tones[n] = false;
-            n = (n + TWELVE - 1) % TWELVE;
-            Debug.Assert(tones[n] == false);
-            tones[n] = true;
+            Debug.Assert(this[k]);
+            Debug.Assert(steps > 0);
+            do
+            {
+                k--;
+            } while (!this[k]);
+
+            return steps == 1 ? k : PreviousInScale(k, steps - 1);
+        }
+
+        public TwelveToneSet()
+        {
+            tones = new bool[TWELVE];
         }
 
         public TwelveToneSet(int[] tones)
@@ -109,6 +183,7 @@ namespace MusicCore
                 Debug.Assert(tones[i] > tones[i - 1]);
                 this.tones[tones[i]] = true;
             }
+            IsConst = true;
         }
 
         public TwelveToneSet(TwelveToneSet other)
@@ -135,15 +210,20 @@ namespace MusicCore
                     i++;
                 }
 
-                tones[pos] = true;
+                this[pos] = true;
             }
+            IsConst = true;
         }
 
-        public TwelveToneSet(Random rand, int ntones, TwelveToneSet scale)
+        public TwelveToneSet(Random rand, int ntones, TwelveToneSet scale = null)
         {
-            int pos = 0;
+            if (scale == null)
+                scale = chromatic;
 
-            // Find the first tone the sclae
+            Debug.Assert(ntones <= scale.Count);
+            tone12 pos = 0;
+
+            // Find the first tone the scale
             while (!scale[pos])
                 pos++;
 
@@ -152,18 +232,20 @@ namespace MusicCore
             pos = scale.Next(pos, times);
 
             tones = new bool[TWELVE];
-            tones[pos] = true;
+            this[pos] = true;
             for (int i=1; i<ntones; i++)
             {
                 pos = scale.Next(pos, 2);
-                tones[pos] = true;
+                this[pos] = true;
             }
 
             Debug.Assert(ntones == this.Count);
+            IsConst = true;
         }
 
         public TwelveToneSet(Random rand, int ntones, bool inScale=true, bool buildOfThirds=false)
         {
+            //TODO: Test it
             tones = new bool[TWELVE];
             for (int i = 0; i<ntones; i++)
             {
@@ -173,11 +255,11 @@ namespace MusicCore
                 {
                     pos = rand.Next(TWELVE);
                 }
-                while (tones[pos]);
-                tones[pos] = true;
+                while (this[pos]);
+                this[pos] = true;
                 if (inScale && !CoveredByAnySimilar(majorScale))
                 {
-                    tones[pos] = false;
+                    this[pos] = false;
                     goto again;
                 }
 
@@ -185,24 +267,33 @@ namespace MusicCore
                 {
                     //TODO:
                 }
-
             }
         }
+        #endregion
 
-        public void IsBuildOfThirds()
+        public void MakeSharp(int k)
         {
-            int count = this.Count;
-
-            TwelveToneSet copy = new TwelveToneSet(majorScale);
-
+            tone12 n = FindNth(k);
+            this[n] = false;
+            n++;
+            Debug.Assert(this[n] == false);
+            this[n] = true;
         }
 
+        public void MakeFlat(int k)
+        {
+            int n = FindNth(k);
+            this[n] = false;
+            n--;
+            Debug.Assert(this[n] == false);
+            this[n] = true;
+        }
 
         public TwelveToneSet MakeThirdChord(int startPos, int count)
         {
             bool[] tones = new bool[TWELVE];
-            Debug.Assert(tones[startPos]);
-            tones[startPos] = true;
+            Debug.Assert(this[startPos]);
+            this[startPos] = true;
             throw new NotImplementedException();
         }
 
@@ -210,36 +301,28 @@ namespace MusicCore
         /// Returns the next note circularly
         /// </summary>
         /// <param name="pos">Current position</param>
-        public int Next(int pos, int times=1)
+        public tone12 Next(tone12 pos, int times=1)
         {
-            Debug.Assert(tones[pos]);
+            Debug.Assert(this[pos]);
             for (int i = 0; i < times; i++)
-                do
-                {
-                    pos++;
-                    if (pos == TWELVE)
-                        pos = 0;
-                } while (!tones[pos]);
+                while (!this[pos++]);
 
             return pos;
         }
 
-        #endregion Constructors
-
-        #region Properties
-        public bool IsRooted { get { return tones[0]; } }
-
-        public int Count { get { return tones.Count(f => f); } }
-
-        private int FindNth(int n)
+        /// <summary>
+        /// Find the n-th scale member
+        /// </summary>
+        /// <param name="n">Zero-based</param>
+        private tone12 FindNth(int n)
         {
             Debug.Assert(n >= 0);
             int m = n;
             for (int i=0; i<TWELVE; i++)
-                if (tones[i] && m-- == 0)
+                if (this[i] && m-- == 0)
                     return i;
 
-            throw new ArgumentException($"Argument n={n} is to high. There should be at least {n+1} tones");
+            throw new ArgumentException($"Argument n={n} is too high. There should be at least {n+1} tones");
         }
 
         public int Calculate(int k)
@@ -250,32 +333,6 @@ namespace MusicCore
             int tone = k % Count;
             return TWELVE * octaves + FindNth(tone);
         }
-
-
-        public int First
-        {
-            get
-            {
-                for (int i = 0; i < TWELVE; i++)
-                    if (tones[i])
-                        return i;
-
-                throw new Exception("Empty!");
-            }
-        }
-
-        public int Last
-        {
-            get
-            {
-                for (int i = TWELVE-1; i >= 0; i--)
-                    if (tones[i])
-                        return i;
-
-                throw new Exception("Empty!");
-            }
-        }
-        #endregion
 
         #region Equals, Similar, CoveredBy
         public override bool Equals(object obj)
@@ -294,7 +351,7 @@ namespace MusicCore
         public bool Equals(TwelveToneSet other)
         {
             for (int i = 0; i < TWELVE; i++)
-                if (tones[i] != other.tones[i])
+                if (this[i] != other[i])
                     return false;
 
             return true;
@@ -323,7 +380,7 @@ namespace MusicCore
         public bool CoveredBy(TwelveToneSet other)
         {
             for (int i = 0; i < TWELVE; i++)
-                if (tones[i] && !other.tones[i])
+                if (this[i] && !other[i])
                     return false;
 
             return true;
@@ -344,6 +401,32 @@ namespace MusicCore
             }
 
             return false;
+        }
+        #endregion
+
+        #region Union and Intersection
+        static TwelveToneSet Union(TwelveToneSet set1, TwelveToneSet set2)
+        {
+            TwelveToneSet set = new TwelveToneSet();
+            for (int i = 0; i < TWELVE; i++)
+                set[i] = set1[i] || set2[i];
+            return set;
+        }
+
+        static TwelveToneSet Intersection(TwelveToneSet set1, TwelveToneSet set2)
+        {
+            TwelveToneSet set = new TwelveToneSet();
+            for (int i = 0; i < TWELVE; i++)
+                set[i] = set1[i] && set2[i];
+            return set;
+        }
+
+        static TwelveToneSet Minus(TwelveToneSet set1, TwelveToneSet set2)
+        {
+            TwelveToneSet set = new TwelveToneSet();
+            for (int i = 0; i < TWELVE; i++)
+                set[i] = set1[i] && !set2[i];
+            return set;
         }
         #endregion
 
@@ -369,8 +452,8 @@ namespace MusicCore
         /// <summary>
         /// Distance based on common tones between the two chords
         /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
+        /// <param name="other">The other TwelveToneSet</param>
+        /// <returns>Greater count minus the number of common tones</returns>
         public int DistanceCommonTones(TwelveToneSet other)
         {
             int max = Math.Max(this.Count, other.Count);
@@ -465,7 +548,8 @@ namespace MusicCore
         #region Modifiers
         public TwelveToneSet ShiftRight(int count)
         {
-            Debug.Assert(count >= 0 && count < 12);
+            Debug.Assert(!IsConst);
+            Debug.Assert(count >= 0 && count < TWELVE);
             bool[] tones = new bool[TWELVE];
             for (int i = count; i < TWELVE; i++)
                 tones[i] = this.tones[i - count];
@@ -478,6 +562,7 @@ namespace MusicCore
 
         public TwelveToneSet ShiftLeft(int count)
         {
+            Debug.Assert(!IsConst);
             Debug.Assert(count >= 0 && count < 12);
             bool[] tones = new bool[TWELVE];
             for (int i = count; i < TWELVE; i++)
@@ -488,6 +573,58 @@ namespace MusicCore
 
             return this;
         }
+
+        public TwelveToneSet ShiftInScale(int count, TwelveToneSet scale)
+        {
+            if (count == 0)
+                return this;
+
+            Debug.Assert(scale.IsConst);
+            Debug.Assert(scale.Count >= Count);
+            TwelveToneSet set = new TwelveToneSet();
+
+            // Transpose in scale notes first
+            TwelveToneSet intersect = Intersection(this, scale);
+            Dictionary<int, int> mapping = new Dictionary<int, int>();
+            foreach (var x in intersect)
+            {
+                mapping[x] = scale.NextInScale(x, count);
+                set[mapping[x]] = true;
+            }
+
+            // If each in-scale note was transposed by the same amount, do it for the rest
+            TwelveToneSet rest = Minus(this, scale);
+            if (mapping.Select(kpv => new tone12(kpv.Value - kpv.Key)).Distinct().Count() == 1)
+            {
+                tone12 offset = mapping.First().Value - mapping.First().Key;
+
+                rest = Minus(this, scale);
+                foreach (var x in rest)
+                {
+                    mapping[x] = (x + offset);
+                    set[mapping[x]] = true;
+                }
+            }
+
+            // If the choice is between in-scale and out-scale, choose in scale
+            rest = Minus(this, scale);
+            foreach (var x in rest)
+            {
+                var list = mapping.Select(kpv => x + (kpv.Value - kpv.Key)).Distinct().ToList();
+                if (list.Count == 2)
+                {
+                    if (scale[list.First()] ^ scale[list.Last()])
+                    {
+                        tone12 tone = scale[list.First()] ? list.First() : list.Last();
+                        mapping[x] = tone;
+                        set[tone] = true;
+                    }
+                }
+            }
+
+            Debug.Assert(set.Count == this.Count);
+            return set;
+        }
         #endregion
 
         public override string ToString()
@@ -496,26 +633,26 @@ namespace MusicCore
             bool useSharp = true;
 
             // Note and Note#
-            if (tones[0] && tones[1])
+            if (this[0] && this[1])
                 useSharp = false;
-            if (tones[2] && tones[3])
+            if (this[2] && this[3])
                 useSharp = false;
-            if (tones[5] && tones[6])
+            if (this[5] && this[6])
                 useSharp = false;
-            if (tones[7] && tones[8])
+            if (this[7] && this[8])
                 useSharp = false;
-            if (tones[9] && tones[10])
+            if (this[9] && this[10])
                 useSharp = false;
 
             // C and A# or C and D#
-            if (tones[0] && tones[3])
+            if (this[0] && this[3])
                 useSharp = false;
-            if (tones[0] && tones[10])
+            if (this[0] && this[10])
                 useSharp = false;
 
             for (int i=0; i<TWELVE; i++)
             {
-                if (!tones[i])
+                if (!this[i])
                     continue;
 
                 switch (i)
@@ -537,6 +674,18 @@ namespace MusicCore
             }
 
             return st;
+        }
+
+        public IEnumerator<tone12> GetEnumerator()
+        {
+            for (int i = 0; i < TWELVE; i++)
+                if (tones[i])
+                    yield return i;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
         }
     }
 }

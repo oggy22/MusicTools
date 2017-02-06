@@ -22,6 +22,15 @@ namespace MusicComposer.Tests
             Assert.IsFalse(TwelveToneSet.minorScale.Similar(TwelveToneSet.minorHarmonicScale));
             Assert.IsFalse(TwelveToneSet.minorScale.Similar(TwelveToneSet.minorMelodicScale));
             Assert.IsFalse(TwelveToneSet.minorHarmonicScale.Similar(TwelveToneSet.minorMelodicScale));
+
+            // Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aoelian, Locrian
+            for (MusicalModes mode = MusicalModes.Ionian; mode<=MusicalModes.Locrian; mode++)
+            {
+                TwelveToneSet set = new TwelveToneSet(mode);
+                Assert.IsTrue(set.Similar(TwelveToneSet.majorScale));
+                Assert.IsFalse(set.Similar(TwelveToneSet.minorHarmonicScale));
+                Assert.IsFalse(set.Similar(TwelveToneSet.minorMelodicScale));
+            }
         }
 
         [TestMethod]
@@ -63,7 +72,94 @@ namespace MusicComposer.Tests
             {
                 TwelveToneSet toneset = new TwelveToneSet((MusicalModes)mode);
                 Assert.IsTrue(toneset.IsRooted);
-                Assert.AreEqual(7, toneset.Count);
+                if ((MusicalModes)mode == MusicalModes.Chromatic)
+                    Assert.AreEqual(TwelveToneSet.TWELVE, toneset.Count);
+                else
+                    Assert.AreEqual(7, toneset.Count);
+            }
+        }
+
+        [TestMethod]
+        public void Tone12Test()
+        {
+            Assert.AreEqual<tone12>(0, 12);
+            Assert.AreEqual<tone12>(3, 15);
+            Assert.AreEqual<tone12>(5, -7);
+        }
+
+        [TestMethod]
+        public void ShiftInScaleTest_InScale()
+        {
+            Assert.AreEqual(
+                new TwelveToneSet("DFA"),
+                new TwelveToneSet("CEG").ShiftInScale(1, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                new TwelveToneSet("CD"),
+                new TwelveToneSet("EF").ShiftInScale(5, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                TwelveToneSet.majorScale,
+                TwelveToneSet.majorScale.ShiftInScale(5, TwelveToneSet.majorScale));
+        }
+
+        [TestMethod]
+        public void ShiftInScaleTest_OutScale()
+        {
+            Assert.AreEqual(
+                new TwelveToneSet("BD#"),
+                new TwelveToneSet("AC#").ShiftInScale(1, TwelveToneSet.majorScale));
+
+            TwelveToneSet AMajor = new TwelveToneSet("AC#E");
+            Assert.AreEqual(
+                new TwelveToneSet("BDF"),
+                AMajor.ShiftInScale(1, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                new TwelveToneSet("GBD"),
+                AMajor.ShiftInScale(-1, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                new TwelveToneSet("FAC"),
+                AMajor.ShiftInScale(-2, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                new TwelveToneSet("EG#B"),
+                AMajor.ShiftInScale(-3, TwelveToneSet.majorScale));
+
+            TwelveToneSet CSharp = new TwelveToneSet("C#EGB");
+            Assert.AreEqual(
+                new TwelveToneSet("DFAC"),
+                CSharp.ShiftInScale(1, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                new TwelveToneSet("F#ACE"),
+                CSharp.ShiftInScale(3, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                new TwelveToneSet("BDFA"),
+                CSharp.ShiftInScale(-1, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                new TwelveToneSet("ACEG"),
+                CSharp.ShiftInScale(-2, TwelveToneSet.majorScale));
+
+            TwelveToneSet FSharp = new TwelveToneSet("F#G");
+            Assert.AreEqual(
+                new TwelveToneSet("EF"),
+                FSharp.ShiftInScale(-1, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                new TwelveToneSet("G#A"),
+                FSharp.ShiftInScale(1, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                new TwelveToneSet("A#B"),
+                FSharp.ShiftInScale(2, TwelveToneSet.majorScale));
+            Assert.AreEqual(
+                new TwelveToneSet("BC"),
+                FSharp.ShiftInScale(3, TwelveToneSet.majorScale));
+        }
+
+        [TestMethod]
+        public void ShiftInScaleTest_0shift()
+        {
+            Random rand = new Random(0);
+            for (int i=0; i<100; i++)
+            {
+                TwelveToneSet set = new TwelveToneSet(rand, rand.Next(3,6), null);
+                TwelveToneSet setShifted = set.ShiftInScale(0, TwelveToneSet.majorScale);
+                Assert.AreEqual(set, setShifted);
             }
         }
     }
