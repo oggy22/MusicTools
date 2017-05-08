@@ -66,7 +66,9 @@ namespace MusicCore
 
                 foreach (var nwd in component.melody.Notes(component.alterations))
                 {
-                    current.Add(new NoteWithDuration(nwd.note, nwd.duration));
+                    // todo: this might be a kludge
+                    int alter = component.alterations.Length == 1 ? component.alterations[0] : 0;
+                    current.Add(new NoteWithDuration(nwd.note + alter, nwd.duration));
                 }
             }
 
@@ -116,11 +118,6 @@ namespace MusicCore
                 throw new ArgumentException($"Unexpected symbol {st[i]}");
             }
         }
-
-        //private MelodyBase FindMelodyBase(char c)
-        //{
-
-        //}
 
         public override string ToString()
         {

@@ -33,8 +33,8 @@ namespace MusicCore
             {'2', new Fraction(2, 1) },
             {'3', new Fraction(3, 1) },
             {'4', new Fraction(4, 1) },
-            {'h', new Fraction(1, 2) },
-            {'q', new Fraction(1, 4) },
+            {'h', new Fraction(1, 2) }, // half
+            {'q', new Fraction(1, 4) }, // quarter
         };
 
         private bool[] b;
@@ -103,6 +103,12 @@ namespace MusicCore
             }
         }
 
+        /// <summary>
+        /// RRhythmPattern
+        /// </summary>
+        /// <param name="bpm"></param>
+        /// <param name="bpu"></param>
+        /// <param name="st">h - half, q - quater</param>
         public RhythmPattern(int bpm, int bpu, string st="")
         {
             Debug.Assert(bpm >= 2 && bpm <= 4);

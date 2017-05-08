@@ -96,7 +96,8 @@ namespace MusicCore
 
                 // The note is written as a number
                 int note = int.Parse(stNoteP);
-                Debug.Assert(@enum.MoveNext());
+                if (!@enum.MoveNext())
+                    Debug.Fail("No more notes in rp");
 
                 // Add to the note list
                 notes.Add(new Tuple<NoteWithDuration, int>(new NoteWithDuration(note, @enum.Current), number));

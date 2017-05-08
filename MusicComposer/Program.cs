@@ -74,11 +74,15 @@ namespace MusicComposer
         {
             if (args.Length < 1)
             {
-                Console.WriteLine("Provide one of the following songs:");
+                Console.WriteLine("Playing all songs:");
                 foreach (MethodInfo mi in typeof(Compositions).GetMethods())
                 {
                     if (mi.GetParameters().Length == 0 && mi.ReturnType == typeof(Melody12Tone))
+                    {
                         Console.Write(mi.Name + " ");
+                        Main(new[] { mi.Name });
+                        Console.WriteLine();
+                    }
                 }
                 Console.WriteLine();
                 return;
@@ -88,7 +92,6 @@ namespace MusicComposer
             Func<Melody12Tone> dgComposition = Delegate.CreateDelegate(typeof(Func<Melody12Tone>), miStatic) as Func<Melody12Tone>;
             Melody12Tone m12tone = dgComposition();
 
-            int tempo = 140;
             int lastnote = 0;
             foreach (var nwd in m12tone.Notes())
             {
@@ -98,8 +101,10 @@ namespace MusicComposer
                     midiOut.Send(MidiMessage.StartNote(lastnote = nwd.note, 100, 1).RawData);
                 Fraction fract = nwd.duration;
                 Console.Write(fract + " ");
-                Thread.Sleep(60 * 1000 * fract.p / fract.q / tempo);
+                Thread.Sleep(60 * 1000 * fract.p / fract.q / m12tone.tempo);
             }
+
+            midiOut.Send(MidiMessage.StartNote(lastnote, 100, 1).RawData);
         }
 
         static int Distance(TwelveToneSet chord1, TwelveToneSet chord2)

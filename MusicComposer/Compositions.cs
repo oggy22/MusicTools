@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using MusicCore;
 
 namespace MusicComposer
@@ -17,7 +13,7 @@ namespace MusicComposer
 
             MelodyComposite melody2 = new MelodyComposite("AA-A--B", melody, melodyEnd);
 
-            Melody12Tone m12tone = new Melody12Tone(melody2, MusicalModes.Minor, 64);
+            Melody12Tone m12tone = new Melody12Tone(melody2, MusicalModes.Minor, 64, 100);
             return m12tone;
         }
 
@@ -26,7 +22,7 @@ namespace MusicComposer
             MelodyBase melody = new MelodyAtomic(new object[] { 0, 2, 4, 6 }, 2);
             var melody2 = new MelodyReversed(new MelodyDiffEnd(melody, new[] { new NoteWithDuration(5, new Fraction(1, 2)) }));
             MelodyComposite melodyComp = new MelodyComposite("ABA+", melody, melody2);
-            Melody12Tone m12tone = new Melody12Tone(melodyComp, MusicalModes.Major, 64);
+            Melody12Tone m12tone = new Melody12Tone(melodyComp, MusicalModes.Major, 64, 150);
             return m12tone;
         }
 
@@ -43,7 +39,7 @@ namespace MusicComposer
             RhythmPattern rhythm = new RhythmPattern(3, 4, "1h.qh.q 1 2");
             MelodyBase melody = new MelodyAtomic(rhythm, new object[] { 4, 3, 2, 1, 0, 0, -1 });
             MelodyComposite melodyComp = new MelodyComposite("AA+", melody);
-            Melody12Tone m12tone = new Melody12Tone(melodyComp, MusicalModes.MinorHarmonic, 64);
+            Melody12Tone m12tone = new Melody12Tone(melodyComp, MusicalModes.MinorHarmonic, 64, 100);
             return m12tone;
         }
 
@@ -56,7 +52,7 @@ namespace MusicComposer
                 new NoteWithDuration(2, new Fraction(1, 2))
             };
             MelodyComposite melodyComp = new MelodyComposite("AA-A--B", melodyCEGB, melodyEnd);
-            return new Melody12Tone(melodyComp, MusicalModes.Major, 64);
+            return new Melody12Tone(melodyComp, MusicalModes.Major, 64, 50);
         }
 
         public static Melody12Tone GabrielaImprov()
@@ -71,7 +67,7 @@ namespace MusicComposer
             return new Melody12Tone(melodyComp, MusicalModes.Minor, 64);
         }
 
-        public static Melody12Tone GMajorMenuet()
+        public static Melody12Tone GMajorMenuet2nd()
         {
             RhythmPattern rhythm = new RhythmPattern(3, 2, "1hhhh");
             ParameterizedMelody pmelody = new ParameterizedMelody("0' 0 1 2 0", rhythm);
@@ -94,7 +90,7 @@ namespace MusicComposer
             melody.anacrusis = new List<NoteWithDuration>() { new NoteWithDuration(-3, new Fraction(1, 1)) };
             MelodyAtomic melody2 = new MelodyAtomic(new RhythmPattern(3, 2, "1113"), new object[] { -2, 1, -1, 0 });
             MelodyComposite meloComp = new MelodyComposite("AA+A++B", melody, melody2);
-            return new Melody12Tone(meloComp, MusicalModes.Major, 65);
+            return new Melody12Tone(meloComp, MusicalModes.Major, 65, 140);
         }
 
         public static Melody12Tone AnotherWhoopy()
@@ -108,7 +104,7 @@ namespace MusicComposer
             };
 
             MelodyComposite mc = new MelodyComposite("AA", melody);
-            return new Melody12Tone(mc, MusicalModes.Major, 64);
+            return new Melody12Tone(mc, MusicalModes.Major, 64, 100);
         }
     }
 }
