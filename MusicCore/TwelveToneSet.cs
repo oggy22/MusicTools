@@ -331,7 +331,7 @@ namespace MusicCore
 
             int octaves = k / Count;
             int tone = k % Count;
-            return TWELVE * octaves + FindNth(tone);
+            return TWELVE * octaves + (int)FindNth(tone);
         }
 
         #region Equals, Similar, CoveredBy

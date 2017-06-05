@@ -5,6 +5,63 @@ namespace MusicComposer
 {
     public static class Compositions
     {
+        public static Melody12Tone CMajorPreludeBach()
+        {
+            MelodyAtomic melody = new MelodyAtomic(new object[] { 0, 1, 2, 3, 4, 2, 3, 4 }, 2);
+
+            MelodyComposite composite = new MelodyComposite("AA", melody);
+            const int C = 0, D = 1, E = 2, F = 3, G = 4, A = 5, B = 6, C2 = 7, D2 = 8, E2 = 9, F2 = 10, G2 = 11, A2 = 12;
+            const int Bsm = -1, Asm = -2, Gsm = -3, Fsm = -4, Esm = -5, Dsm = -6;   // sm - small octave
+            string FSharp = "3+";
+
+            MelodySequencer seq = new MelodySequencer(composite,
+            new object[] { C, E, G, C2, E2 },   //C
+            new object[] { C, D, A, D2, F2 },   //C\d
+            new object[] { Bsm, D, G, D2, F2 }, //B\G
+            new object[] { C, E, G, C2, E2 },   //C
+
+            new object[] { C, E, A, E2, A2 },       //C\a
+            new object[] { C, D, FSharp, A, D2 },   //C\D
+            new object[] { Bsm, D, G, D2, G2 },     //B\G
+            new object[] { Bsm, C, E, G, C2 },      //B\C = Cmaj7
+            new object[] { Asm, C, E, G, C2 },      //A\C = a7
+            new object[] { Dsm, Asm, D, FSharp, C2 },   //D7
+            new object[] { Gsm, Bsm, D, G, B }      //G
+            );
+
+            return new Melody12Tone(seq, MusicalModes.Major, 60, 80);
+        }
+
+        public static Melody12Tone DanceOfClocks()
+        {
+            RhythmPatternBase rhythm = new RhythmPattern(4, new bool[] { true, true, true, true, false, false, false, false });
+            MelodyAtomic melody = new MelodyAtomic(rhythm, new object[] { 0, 1, 1, 2 });
+            MelodySequencer seq = new MelodySequencer(melody,
+                new object[] { 2, 4, 5 },
+                new object[] { 5, 7, 6 },
+                new object[] { 4, 5, 6 },
+                new object[] { 6, 10, 9 },
+
+                new object[] { 2, 9, 8 },
+                new object[] { 8, 6, 5 },
+                new object[] { 5, 3, 2 }
+                );
+
+            return new Melody12Tone(seq, MusicalModes.Major, 64, 80);
+        }
+
+        public static Melody12Tone ChopinAccompany()
+        {
+            RhythmPatternBase rhythm = new RhythmPattern(3, new bool[] { true, true, true });
+            MelodyAtomic melody = new MelodyAtomic(rhythm, new object[] { 0, "1/3", "2/4" });
+            MelodySequencer seq = new MelodySequencer(melody,
+                new object[] { 0, 2, 4, 7, 9 },
+                new object[] { 0, 2, 4, 7, 9 }
+                );
+
+            return new Melody12Tone(seq, MusicalModes.Major, 64, 60);
+        }
+
         public static Melody12Tone OggyMelody()
         {
             RhythmPattern rhythm = new RhythmPattern(3, 2, "hh11");
@@ -22,7 +79,7 @@ namespace MusicComposer
             MelodyBase melody = new MelodyAtomic(new object[] { 0, 2, 4, 6 }, 2);
             var melody2 = new MelodyReversed(new MelodyDiffEnd(melody, new[] { new NoteWithDuration(5, new Fraction(1, 2)) }));
             MelodyComposite melodyComp = new MelodyComposite("ABA+", melody, melody2);
-            Melody12Tone m12tone = new Melody12Tone(melodyComp, MusicalModes.Major, 64, 150);
+            Melody12Tone m12tone = new Melody12Tone(melodyComp, MusicalModes.Major, 60, 150);
             return m12tone;
         }
 
@@ -52,7 +109,7 @@ namespace MusicComposer
                 new NoteWithDuration(2, new Fraction(1, 2))
             };
             MelodyComposite melodyComp = new MelodyComposite("AA-A--B", melodyCEGB, melodyEnd);
-            return new Melody12Tone(melodyComp, MusicalModes.Major, 64, 50);
+            return new Melody12Tone(melodyComp, MusicalModes.Major, 60, 50);
         }
 
         public static Melody12Tone GabrielaImprov()

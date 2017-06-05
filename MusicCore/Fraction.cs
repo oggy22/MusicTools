@@ -52,7 +52,7 @@ namespace MusicCore
             return new Fraction(f1.p * f2.q - f2.p * f1.q, f1.q * f2.q);
         }
 
-        public static Fraction operator*(Fraction f, int n)
+        public static Fraction operator*(int n, Fraction f)
         {
             return new Fraction(f.p * n, f.q);
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace MusicCore
 {
@@ -13,11 +12,32 @@ namespace MusicCore
         public readonly Alteration alter;
         public const int PAUSE = int.MinValue;
         public bool IsPause => note == PAUSE;
+        public Note otherNote;
 
-        public Note(int note, Alteration alter)
+        public Note(int note, Alteration alter = Alteration.Natural)
         {
             this.note = note;
             this.alter = alter;
+        }
+
+        public Note(string st)
+        {
+            int index = st.IndexOf('/');
+
+            if (index != -1)
+            {
+                otherNote = new Note(st.Substring(index + 1));
+                st = st.Substring(0, index);
+            }
+
+            note = int.Parse(st.TrimEnd('+', '-'));
+            char last = st[st.Length - 1];
+            if (last == '+')
+                alter = Alteration.Sharp;
+            else if (last == '-')
+                alter = Alteration.Flat;
+            else
+                alter = Alteration.Natural;
         }
 
         private static string StAlter(Alteration alter)

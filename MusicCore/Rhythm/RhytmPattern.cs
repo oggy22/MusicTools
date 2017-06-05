@@ -133,7 +133,7 @@ namespace MusicCore
                 }
                 i += add;
                 b_temp[i] = true;
-                add = (int)(dict[c] * bpu);
+                add = (int)(bpu * dict[c]);
             }
             i += add;
 

@@ -33,7 +33,15 @@ namespace MusicCore
             int i = 0;
             foreach (var fract in rhythm.Notes())
             {
-                yield return new NoteWithDuration((int)notes[i], fract);
+                if (notes[i] is string)
+                {
+                    Note note = new Note(notes[i] as string);
+                    NoteWithDuration notewd = new NoteWithDuration(note.note, note.alter, fract);
+                    notewd.otherNote = note.otherNote;
+                    yield return notewd;
+                }
+                else
+                    yield return new NoteWithDuration((int)notes[i], fract);
                 i++;
             }
         }
@@ -49,6 +57,16 @@ namespace MusicCore
             }
         }
 
+        public MelodyAtomic(RhythmPatternBase rhythm, Random rand)
+        {
+            int count = rhythm.CountNotes();
+            notes = new object[count];
+
+            const int maxInterval = 2;
+            for (int i=0; i<count; i++)
+                notes[i] = rand.Next(2* maxInterval + 1) - maxInterval;
+        }
+
         public MelodyAtomic(RhythmPatternBase rhythm, object[] notes)
         {
             Debug.Assert(rhythm.CountNotes() == notes.Length);
@@ -56,7 +74,7 @@ namespace MusicCore
             Debug.Assert(notes.Length == rhythm.CountNotes());
             foreach (var note in notes)
             {
-                Debug.Assert(note is int || note is Note);
+                Debug.Assert(note is int || note is Note || note is string);
             }
             this.notes = (object[])notes.Clone();
         }
