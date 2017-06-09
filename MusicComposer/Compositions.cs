@@ -10,8 +10,8 @@ namespace MusicComposer
             MelodyAtomic melody = new MelodyAtomic(new object[] { 0, 1, 2, 3, 4, 2, 3, 4 }, 2);
 
             MelodyComposite composite = new MelodyComposite("AA", melody);
-            const int C = 0, D = 1, E = 2, F = 3, G = 4, A = 5, B = 6, C2 = 7, D2 = 8, E2 = 9, F2 = 10, G2 = 11, A2 = 12;
-            const int Bsm = -1, Asm = -2, Gsm = -3, Fsm = -4, Esm = -5, Dsm = -6;   // sm - small octave
+            const int C = 0, D = 1, E = 2, /*F = 3,*/ G = 4, A = 5, B = 6, C2 = 7, D2 = 8, E2 = 9, F2 = 10, G2 = 11, A2 = 12;
+            const int Bsm = -1, Asm = -2, Gsm = -3, /*Fsm = -4, Esm = -5,*/ Dsm = -6;   // sm - small octave
             string FSharp = "3+";
 
             MelodySequencer seq = new MelodySequencer(composite,

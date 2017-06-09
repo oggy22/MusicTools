@@ -74,8 +74,6 @@ namespace MusicalHearing
 
         }
 
-        private WaveOut waveOut;
-
         private void button3_Click(object sender, EventArgs e)
         {
             for (int i=0; i<keys.Length; i++)
