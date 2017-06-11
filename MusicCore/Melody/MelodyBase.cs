@@ -50,9 +50,14 @@ namespace MusicCore
             return string.Empty;
         }
 
-        public override string ToString()
+        public string NoteToString()
         {
             return string.Format($"{note}{StAlter(alter)}");
+        }
+
+        public override string ToString()
+        {
+            return NoteToString();
         }
     }
 
@@ -82,7 +87,7 @@ namespace MusicCore
 
         public override string ToString()
         {
-            return string.Format($"{this as Note}{duration}");
+            return $"{NoteToString()}:{duration}";
         }
     }
 

@@ -83,6 +83,8 @@ namespace MusicComposer
                         Main(new[] { mi.Name });
                         Console.WriteLine();
                     }
+                    Console.WriteLine("Wait for 1 second...");
+                    Thread.Sleep(1000);
                 }
                 Console.WriteLine();
                 return;
@@ -97,14 +99,19 @@ namespace MusicComposer
             {
                 midiOut.Send(MidiMessage.StopNote(lastnote, 100, 1).RawData);
 
+                // Play the note, and if it's pause mute the last note
                 if (!nwd.IsPause)
                     midiOut.Send(MidiMessage.StartNote(lastnote = nwd.note, 100, 1).RawData);
+                else
+                    midiOut.Send(MidiMessage.StartNote(lastnote, 0, 1).RawData);
+
                 Fraction fract = nwd.duration;
                 Console.Write(fract + " ");
                 Thread.Sleep(60 * 1000 * fract.p / fract.q / m12tone.tempo);
             }
 
-            midiOut.Send(MidiMessage.StartNote(lastnote, 100, 1).RawData);
+            // Mute the last note
+            midiOut.Send(MidiMessage.StartNote(lastnote, 0, 1).RawData);
         }
 
         static int Distance(TwelveToneSet chord1, TwelveToneSet chord2)

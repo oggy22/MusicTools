@@ -59,7 +59,7 @@ namespace MusicComposer
                 new object[] { 0, 2, 4, 7, 9 }
                 );
 
-            return new Melody12Tone(seq, MusicalModes.Major, 64, 60);
+            return new Melody12Tone(seq, MusicalModes.Major, 64, 100);
         }
 
         public static Melody12Tone OggyMelody()
