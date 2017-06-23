@@ -74,7 +74,7 @@ namespace MusicComposer
         {
             if (args.Length < 1)
             {
-                Console.WriteLine("Playing all songs:");
+                Console.WriteLine("All songs:");
                 foreach (MethodInfo mi in typeof(Compositions).GetMethods())
                 {
                     if (mi.GetParameters().Length == 0 && mi.ReturnType == typeof(Melody12Tone))
@@ -82,9 +82,9 @@ namespace MusicComposer
                         Console.Write(mi.Name + " ");
                         Main(new[] { mi.Name });
                         Console.WriteLine();
+                        Console.WriteLine("Wait for 1 second...");
+                        Thread.Sleep(1000);
                     }
-                    Console.WriteLine("Wait for 1 second...");
-                    Thread.Sleep(1000);
                 }
                 Console.WriteLine();
                 return;
