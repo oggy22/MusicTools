@@ -61,7 +61,7 @@ namespace MusicCore
         }
     }
 
-    public class NoteWithDuration : Note
+    public class NoteWithDuration : Note, IEquatable<NoteWithDuration>
     {
         public readonly Fraction duration;
 
@@ -89,6 +89,20 @@ namespace MusicCore
         {
             return $"{NoteToString()}:{duration}";
         }
+
+        public bool Equals(NoteWithDuration other)
+        {
+            return duration == other.duration &&
+                note == other.note &&
+                alter == other.alter;
+        }
+
+        public override bool Equals(object obj)
+        {
+            NoteWithDuration node = obj as NoteWithDuration;
+            if (node == null) return false;
+            return Equals(node);
+        }
     }
 
     public abstract class MelodyBase
@@ -105,5 +119,30 @@ namespace MusicCore
         public abstract IEnumerable<NoteWithDuration> Anacrusis { get; }
 
         public abstract Fraction Duration { get; }
+    }
+
+    public class NoteList
+    {
+        private List<Note> notes;
+
+        public NoteList(int[] ints)
+        {
+            notes = new List<Note>();
+            foreach (int i in ints)
+                notes.Add(new Note(i));
+        }
+
+        public NoteList(object[] objs)
+        {
+            notes = new List<Note>();
+            foreach (object obj in objs)
+            {
+                if (obj is int) notes.Add(new Note((int)obj));
+                else if (obj is Note) notes.Add(obj as Note);
+                else Debug.Fail("unrecognized");
+            }
+        }
+
+        public IEnumerable<Note> Notes() => notes;
     }
 }

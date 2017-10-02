@@ -87,7 +87,7 @@ namespace MusicCore
             {
                 if (char.IsLetter(st[i]))
                 {
-                    Component component = new Component() { alterations = new int[]{ 0 }, melody = melodies[st[i] - min] };
+                    Component component = new Component() { alterations = new int[] { 0 }, melody = melodies[st[i] - min] };
                     while (i + 1 < st.Length && !char.IsLetter(st[i + 1]))
                     {
                         switch (st[i + 1])

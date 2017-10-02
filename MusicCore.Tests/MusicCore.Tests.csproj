@@ -52,6 +52,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="FractionTest.cs" />
+    <Compile Include="Melody\MelodyCompositeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -60,6 +61,7 @@
       <Name>MusicCore</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

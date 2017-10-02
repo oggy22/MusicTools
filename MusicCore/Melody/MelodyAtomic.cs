@@ -79,7 +79,7 @@ namespace MusicCore
             this.notes = (object[])notes.Clone();
         }
 
-        public MelodyAtomic(object[] notes, int bpm)
+        public MelodyAtomic(object[] notes, int bpm = 4)
         {
             Debug.Assert(notes.Length % bpm == 0);
             rhythm = new RhythmPattern(bpm, notes.Select(obj => obj != null).ToArray());

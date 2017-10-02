@@ -74,7 +74,7 @@ namespace MusicComposer
         {
             if (args.Length < 1)
             {
-                Console.WriteLine("All songs:");
+                Console.WriteLine("Playing all songs:");
                 foreach (MethodInfo mi in typeof(Compositions).GetMethods())
                 {
                     if (mi.GetParameters().Length == 0 && mi.ReturnType == typeof(Melody12Tone))

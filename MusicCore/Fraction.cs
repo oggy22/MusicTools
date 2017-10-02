@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace MusicCore
 {
-    public struct Fraction
+    public struct Fraction : IEquatable<Fraction>
     {
         static public readonly Fraction ZERO = new Fraction(0, 1);
 
@@ -85,6 +85,21 @@ namespace MusicCore
             if (q == 1)
                 return $"{p}";
             return $"{p}/{q}";
+        }
+
+        public bool Equals(Fraction other)
+        {
+            return p == other.p && q == other.q;
+        }
+
+        public static bool operator ==(Fraction f1, Fraction f2)
+        {
+            return f1.Equals(f2);
+        }
+
+        public static bool operator !=(Fraction f1, Fraction f2)
+        {
+            return !f1.Equals(f2);
         }
     }
 }
