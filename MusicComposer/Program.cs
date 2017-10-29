@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace MusicComposer
 {
-    class Program
+    partial class Program
     {
         static MidiOut midiOut = new MidiOut(0);
 
@@ -87,6 +87,12 @@ namespace MusicComposer
                     }
                 }
                 Console.WriteLine();
+                return;
+            }
+
+            if (args[0] == "RandomSequencer")
+            {
+                RandomSequencer();
                 return;
             }
 

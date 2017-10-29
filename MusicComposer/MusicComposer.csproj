@@ -50,6 +50,7 @@
     <Compile Include="Compositions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RandomSequencer.cs" />
     <Compile Include="RhythmMaker.cs" />
   </ItemGroup>
   <ItemGroup>

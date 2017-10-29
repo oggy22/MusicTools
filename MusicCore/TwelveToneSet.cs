@@ -41,6 +41,9 @@ namespace MusicCore
         static public TwelveToneSet minorTriad = new TwelveToneSet("CE♭G");
         static public TwelveToneSet major7 = new TwelveToneSet("CEGB♭");
         static public TwelveToneSet minor7 = new TwelveToneSet("CE♭GB♭");
+        static public TwelveToneSet augmented = new TwelveToneSet("CEG#");
+        static public TwelveToneSet halfDiminished = new TwelveToneSet("CDFG#");
+        static public TwelveToneSet fullDiminished = new TwelveToneSet("CE♭F#A");
 
         static public TwelveToneSet chromatic = new TwelveToneSet(MusicalModes.Chromatic);
         #endregion
@@ -270,6 +273,12 @@ namespace MusicCore
             }
         }
         #endregion
+
+        public void Add(int k)
+        {
+            Debug.Assert(!IsConst);
+            tones[k] = true;
+        }
 
         public void MakeSharp(int k)
         {

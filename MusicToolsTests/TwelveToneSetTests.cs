@@ -80,6 +80,23 @@ namespace MusicComposer.Tests
         }
 
         [TestMethod]
+        public void TwelveToneSetConsts()
+        {
+            // Covered by major scale
+            Assert.IsTrue(TwelveToneSet.majorTriad.CoveredByAnySimilar(TwelveToneSet.majorScale));
+            Assert.IsTrue(TwelveToneSet.minorTriad.CoveredByAnySimilar(TwelveToneSet.majorScale));
+            Assert.IsTrue(TwelveToneSet.major7.CoveredByAnySimilar(TwelveToneSet.majorScale));
+            Assert.IsTrue(TwelveToneSet.minor7.CoveredByAnySimilar(TwelveToneSet.majorScale));
+            Assert.IsTrue(TwelveToneSet.halfDiminished.CoveredByAnySimilar(TwelveToneSet.majorScale));
+            Assert.IsFalse(TwelveToneSet.fullDiminished.CoveredByAnySimilar(TwelveToneSet.majorScale));
+            Assert.IsFalse(TwelveToneSet.augmented.CoveredByAnySimilar(TwelveToneSet.majorScale));
+
+            // Covered by minor harmonic scale
+            Assert.IsTrue(TwelveToneSet.fullDiminished.CoveredByAnySimilar(TwelveToneSet.minorHarmonicScale));
+            Assert.IsTrue(TwelveToneSet.augmented.CoveredByAnySimilar(TwelveToneSet.minorHarmonicScale));
+        }
+
+        [TestMethod]
         public void Tone12Test()
         {
             Assert.AreEqual<tone12>(0, 12);
