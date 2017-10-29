@@ -3,6 +3,7 @@ using MusicCore;
 using NAudio.Midi;
 using System.Threading;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace MusicComposer
 {
@@ -100,24 +101,36 @@ namespace MusicComposer
             Func<Melody12Tone> dgComposition = Delegate.CreateDelegate(typeof(Func<Melody12Tone>), miStatic) as Func<Melody12Tone>;
             Melody12Tone m12tone = dgComposition();
 
-            int lastnote = 0;
+            List<int> lastnotes = new List<int>();
             foreach (var nwd in m12tone.Notes())
             {
-                midiOut.Send(MidiMessage.StopNote(lastnote, 100, 1).RawData);
+                foreach (int note in lastnotes)
+                    midiOut.Send(MidiMessage.StopNote(note, 100, 1).RawData);
 
                 // Play the note, and if it's pause mute the last note
                 if (!nwd.IsPause)
-                    midiOut.Send(MidiMessage.StartNote(lastnote = nwd.note, 100, 1).RawData);
+                {
+                    Note note = nwd;
+                    lastnotes = new List<int>();
+                    do
+                    {
+                        midiOut.Send(MidiMessage.StartNote(note.note, 100, 1).RawData);
+                        lastnotes.Add(note.note);
+                        note = note.otherNote;
+                    } while (note != null);
+                }
                 else
-                    midiOut.Send(MidiMessage.StartNote(lastnote, 0, 1).RawData);
+                    foreach (var note in lastnotes)
+                        midiOut.Send(MidiMessage.StartNote(note, 0, 1).RawData);
 
                 Fraction fract = nwd.duration;
                 Console.Write(fract + " ");
                 Thread.Sleep(60 * 1000 * fract.p / fract.q / m12tone.tempo);
             }
 
-            // Mute the last note
-            midiOut.Send(MidiMessage.StartNote(lastnote, 0, 1).RawData);
+            // Mute the last note(s)
+            foreach (var note in lastnotes)
+                midiOut.Send(MidiMessage.StartNote(note, 0, 1).RawData);
         }
 
         static int Distance(TwelveToneSet chord1, TwelveToneSet chord2)

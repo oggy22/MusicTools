@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace MusicCore
 {
@@ -32,13 +33,24 @@ namespace MusicCore
             this.tempo = tempo;
         }
 
+
+        static NoteWithDuration Transform(NoteWithDuration note, Func<NoteWithDuration, NoteWithDuration> trans)
+        {
+            NoteWithDuration noteReturn = trans(note);
+            if (note.otherNote != null)
+                noteReturn.otherNote = Transform(note.otherNote as NoteWithDuration, trans);
+
+            return noteReturn;
+        }
+
         public override IEnumerable<NoteWithDuration> Notes()
         {
             foreach (var notewd in melodyBase.Notes())
             {
-                yield return new NoteWithDuration(
-                    notewd.IsPause ? Note.PAUSE : key + toneset.Calculate(notewd.note) + (int)notewd.alter,
-                    notewd.duration);
+                yield return Transform(notewd, note =>
+                    new NoteWithDuration(
+                    note.IsPause ? Note.PAUSE : key + toneset.Calculate(note.note) + (int)note.alter,
+                    note.duration));
             }
         }
     }
@@ -76,6 +88,16 @@ namespace MusicCore
         {
             return new NoteSequence(objs);
         }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (Note note in notes)
+            {
+                sb.Append($"{note} ");
+            }
+            return sb.ToString();
+        }
     }
 
     public class MelodySequencer : MelodyBase
@@ -102,8 +124,26 @@ namespace MusicCore
                 foreach (var note in melody.Notes())
                 {
                     int number = seq[note.note].note;
-                    Alteration alter = (Alteration)((int)note.alter + (int)seq[note.note].alter);
-                    NoteWithDuration noteReturn = new NoteWithDuration(number, alter, note.duration);
+
+                    Note currNote = note;
+
+                    NoteWithDuration noteReturn = null, noteTail = null;
+
+
+                    do
+                    {
+                        Alteration alter = (Alteration)((int)currNote.alter + (int)seq[currNote.note].alter);
+                        if (noteReturn == null)
+                            noteReturn = noteTail = new NoteWithDuration(number, alter, note.duration);
+                        else
+                        {
+                            noteTail.otherNote = new NoteWithDuration(number, alter, note.duration);
+                            noteTail = noteTail.otherNote as NoteWithDuration;
+                        }
+
+                        currNote = currNote.otherNote;
+                    } while (currNote != null);
+
                     yield return noteReturn;
                 }
             }
