@@ -180,4 +180,20 @@ namespace MusicComposer.Tests
             }
         }
     }
+
+    [TestClass]
+    public class ToneSetTest
+    {
+        [TestMethod]
+        public void GetHighestCommonSubHarmonicTest()
+        {
+            ToneSet majorChord = new ToneSet(48, TwelveToneSet.majorTriad);
+            Assert.AreEqual<int>(24, majorChord.GetHighestCommonSubHarmonic());
+            Assert.AreEqual<int>(86, majorChord.GetLowestCommonHarmonic());
+
+            ToneSet minorChord = new ToneSet(48, TwelveToneSet.minorTriad);
+            Assert.AreEqual<int>(17, minorChord.GetHighestCommonSubHarmonic());
+            Assert.AreEqual<int>(86, minorChord.GetLowestCommonHarmonic());
+        }
+    }
 }

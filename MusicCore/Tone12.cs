@@ -1,7 +1,78 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace MusicCore
 {
+    /// <summary>
+    /// Represents a midi tone (from
+    /// </summary>
+    public class Tone
+    {
+        public const int OCTAVE = 12;
+        public const int FIFTH = 7;
+        public const int MAJOR3 = 4;
+        public const int MINOR3 = 3;
+        public const int SECOND = 2;
+
+        int tone;
+        public Tone(int tone)
+        {
+            this.tone = tone;
+        }
+
+        public static implicit operator int(Tone tone)
+        {
+            return tone.tone;
+        }
+
+        public static implicit operator Tone(int tone)
+        {
+            return new Tone(tone);
+        }
+
+        public static IEnumerable<int> GetHarmonics()
+        {
+            yield return 0;
+            yield return OCTAVE;
+            yield return OCTAVE + FIFTH;
+
+            // Second octave
+            yield return OCTAVE + OCTAVE;
+            yield return OCTAVE + OCTAVE + MAJOR3;
+            yield return OCTAVE + OCTAVE + FIFTH;
+            yield return OCTAVE + OCTAVE + FIFTH + MINOR3;
+
+            // Third octave
+            yield return OCTAVE + OCTAVE + OCTAVE;
+            yield return OCTAVE + OCTAVE + OCTAVE + SECOND;
+            yield return OCTAVE + OCTAVE + OCTAVE + MAJOR3;
+            yield return OCTAVE + OCTAVE + OCTAVE + FIFTH;
+            yield return OCTAVE + OCTAVE + OCTAVE + FIFTH + MINOR3;
+            yield return OCTAVE + OCTAVE + OCTAVE + FIFTH + MINOR3 + 1;
+
+            // The rest
+            for (int i = 4 * OCTAVE; ; i++)
+                yield return i;
+        }
+
+        public IEnumerable<Tone> GetHarmonicsUp()
+        {
+            foreach (int d in GetHarmonics())
+                yield return new Tone(tone + d);
+        }
+
+        public IEnumerable<Tone> GetHarmonicsDown()
+        {
+            foreach (int d in GetHarmonics())
+                yield return new Tone(tone - d);
+        }
+
+        public override string ToString()
+        {
+            return $"{tone} = {tone / 12}";
+        }
+    }
+
     public class tone12
     {
         public override int GetHashCode()

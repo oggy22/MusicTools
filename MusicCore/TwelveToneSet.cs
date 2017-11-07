@@ -20,6 +20,133 @@ namespace MusicCore
         MinorMelodic
     }
 
+    public class ToneSet : IEnumerable<Tone>
+    {
+        public ToneSet()
+        {
+            tones = new bool[128];
+        }
+
+        public ToneSet(params int[] array) : this()
+        {
+            foreach (var num in array)
+                tones[num] = true;
+        }
+
+        public ToneSet(Tone tone, TwelveToneSet twelveToneSet)
+        {
+            foreach (var t in twelveToneSet)
+                tones[tone + t] = true;
+        }
+
+        bool[] tones;
+
+        public Tone GetLowestCommonHarmonic()
+        {
+            List<IEnumerator<Tone>> iters = new List<IEnumerator<Tone>>();
+
+            foreach (var iter in this)
+            {
+                iters.Add(iter.GetHarmonicsUp().GetEnumerator());
+                iters.Last().MoveNext();
+            }
+
+            int min;
+            while ((min = iters.Min(it => (int)it.Current)) < iters.Max(it => (int)it.Current))
+            {
+                var iter = iters.Find(it => it.Current == min);
+                bool moved = iter.MoveNext();
+                Debug.Assert(moved);
+            }
+
+            return iters[0].Current;
+        }
+
+        public Tone GetHighestCommonSubHarmonic()
+        {
+            List<IEnumerator<Tone>> iters = new List<IEnumerator<Tone>>();
+
+            foreach (var tone in this)
+            {
+                iters.Add(tone.GetHarmonicsDown().GetEnumerator());
+                iters.Last().MoveNext();
+            }
+
+            int max;
+            while (iters.Min(it => (int)it.Current) < (max=iters.Max(it => (int)it.Current)))
+            {
+                var iter = iters.Find(it => it.Current == max);
+                bool moved = iter.MoveNext();
+                Debug.Assert(moved);
+            }
+
+            return iters[0].Current;
+        }
+
+        public Tone GetDisharmony(int A = 1, int B = 2)
+        {
+            return A * GetLowestCommonHarmonic() - B * GetHighestCommonSubHarmonic();
+        }
+
+        public TwelveToneSet ToTwelveToneSet()
+        {
+            TwelveToneSet set = new TwelveToneSet();
+            foreach (var tone in this)
+                set.Add(tone % 12);
+
+            return set;
+        }
+
+        public IEnumerator<Tone> GetEnumerator()
+        {
+            return new Iterator(this);
+        }
+
+        class Iterator : IEnumerator<Tone>
+        {
+            public Iterator(ToneSet toneset)
+            {
+                this.toneset = toneset;
+                Reset();
+            }
+
+            int index;
+            ToneSet toneset;
+
+            public Tone Current => new Tone(index);
+
+            object IEnumerator.Current => new Tone(index);
+
+            public void Dispose()
+            {
+                //Dispose(true);
+            }
+
+            public bool MoveNext()
+            {
+                do
+                {
+                    index++;
+                    if (index >= toneset.tones.Length)
+                        return false;
+                }
+                while (!toneset.tones[index]);
+                return true;
+            }
+
+            public void Reset()
+            {
+                index = -1;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new Iterator(this);
+        }
+    }
+
+
     public class TwelveToneSet : IEnumerable<tone12>
     {
         #region Constants
@@ -697,4 +824,6 @@ namespace MusicCore
             throw new NotImplementedException();
         }
     }
+
+    
 }
