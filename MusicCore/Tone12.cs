@@ -1,7 +1,102 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace MusicCore
 {
+    /// <summary>
+    /// Represents a midi tone (from
+    /// </summary>
+    public class Tone
+    {
+        public const int OCTAVE = 12;
+        public const int FIFTH = 7;
+        public const int MAJOR3 = 4;
+        public const int MINOR3 = 3;
+        public const int SECOND = 2;
+
+        int tone;
+        public Tone(int tone)
+        {
+            this.tone = tone;
+        }
+
+        public Tone(string st)
+        {
+            tone = FromString(st);
+        }
+
+        public static int FromString(string st)
+        {
+            int i = st.IndexOfAny(new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+            if (i == -1)
+            {
+                return tone12.FromString(st);
+            }
+            else
+            {
+                int octave = int.Parse(st.Substring(i));
+                return 12 * octave + tone12.FromString(st.Substring(0, i));
+            }
+        }
+
+        public static implicit operator int(Tone tone)
+        {
+            return tone.tone;
+        }
+
+        public static implicit operator Tone(int tone)
+        {
+            return new Tone(tone);
+        }
+
+        public static implicit operator Tone(string tone)
+        {
+            return new Tone(tone);
+        }
+
+        public static IEnumerable<int> GetHarmonics()
+        {
+            yield return 0;
+            yield return OCTAVE;
+            yield return OCTAVE + FIFTH;
+
+            // Second octave
+            yield return OCTAVE + OCTAVE;
+            yield return OCTAVE + OCTAVE + MAJOR3;
+            yield return OCTAVE + OCTAVE + FIFTH;
+            yield return OCTAVE + OCTAVE + FIFTH + MINOR3;
+
+            // Third octave
+            yield return OCTAVE + OCTAVE + OCTAVE;
+            yield return OCTAVE + OCTAVE + OCTAVE + SECOND;
+            yield return OCTAVE + OCTAVE + OCTAVE + MAJOR3;
+            yield return OCTAVE + OCTAVE + OCTAVE + FIFTH;
+            yield return OCTAVE + OCTAVE + OCTAVE + FIFTH + MINOR3;
+            yield return OCTAVE + OCTAVE + OCTAVE + FIFTH + MINOR3 + 1;
+
+            // The rest
+            for (int i = 4 * OCTAVE; ; i++)
+                yield return i;
+        }
+
+        public IEnumerable<Tone> GetHarmonicsUp()
+        {
+            foreach (int d in GetHarmonics())
+                yield return new Tone(tone + d);
+        }
+
+        public IEnumerable<Tone> GetHarmonicsDown()
+        {
+            foreach (int d in GetHarmonics())
+                yield return new Tone(tone - d);
+        }
+
+        public override string ToString()
+        {
+            return $"{new tone12(tone % 12)}{tone / 12}";
+        }
+    }
+
     public class tone12
     {
         public override int GetHashCode()
@@ -60,6 +155,35 @@ namespace MusicCore
         public static tone12 operator+(tone12 tone, int x)
         {
             return new tone12(correct(tone.tone+x));
+        }
+
+        public static int FromString(string st)
+        {
+            Debug.Assert(st.Length >= 1 && st.Length <= 2);
+            st = st.ToUpper();
+            Debug.Assert("CDEFGAB".IndexOf(st[0]) != -1);
+            int num;
+            switch(st[0])
+            {
+                case 'C': num = 0; break;
+                case 'D': num = 2; break;
+                case 'E': num = 4; break;
+                case 'F': num = 5; break;
+                case 'G': num = 7; break;
+                case 'A': num = 9; break;
+                case 'B': num = 11; break;
+                default: Debug.Fail($"{st[0]} is not a note!"); num = 0; break;
+            }
+            if (st.Length == 2)
+            {
+                if (st[1] == '#')
+                    num++;
+                else if (st[1] == 'b' || st[1] == '♭')
+                    num--;
+                else Debug.Fail($"{st[1]} is wrong modifier!");
+            }
+                
+            return num;
         }
 
         public override string ToString()
