@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace MusicCore
 {
@@ -33,7 +34,7 @@ namespace MusicCore
                 tones[num] = true;
         }
 
-        public ToneSet(Tone tone, TwelveToneSet twelveToneSet)
+        public ToneSet(Tone tone, TwelveToneSet twelveToneSet) : this()
         {
             foreach (var t in twelveToneSet)
                 tones[tone + t] = true;
@@ -119,7 +120,6 @@ namespace MusicCore
 
             public void Dispose()
             {
-                //Dispose(true);
             }
 
             public bool MoveNext()
@@ -144,8 +144,17 @@ namespace MusicCore
         {
             return new Iterator(this);
         }
-    }
 
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i<tones.Length; i++)
+                if (tones[i])
+                    sb.Append($"{new Tone(i).ToString()} ");
+
+            return sb.ToString();
+        }
+    }
 
     public class TwelveToneSet : IEnumerable<tone12>
     {
@@ -159,6 +168,7 @@ namespace MusicCore
             {
                 {'C', 0}, {'D', 2}, {'E', 4}, {'F', 5}, {'G', 7}, {'A', 9}, {'B', 11}, {'H', 11}
             };
+
         static public TwelveToneSet majorScale = new TwelveToneSet("CDEFGAH");
         static public TwelveToneSet minorScale = new TwelveToneSet("CDE♭FGA♭B♭");
         static public TwelveToneSet minorHarmonicScale = new TwelveToneSet("CDE♭FGA♭B");

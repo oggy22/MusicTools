@@ -20,12 +20,36 @@ namespace MusicCore
             this.tone = tone;
         }
 
+        public Tone(string st)
+        {
+            tone = FromString(st);
+        }
+
+        public static int FromString(string st)
+        {
+            int i = st.IndexOfAny(new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+            if (i == -1)
+            {
+                return tone12.FromString(st);
+            }
+            else
+            {
+                int octave = int.Parse(st.Substring(i));
+                return 12 * octave + tone12.FromString(st.Substring(0, i));
+            }
+        }
+
         public static implicit operator int(Tone tone)
         {
             return tone.tone;
         }
 
         public static implicit operator Tone(int tone)
+        {
+            return new Tone(tone);
+        }
+
+        public static implicit operator Tone(string tone)
         {
             return new Tone(tone);
         }
@@ -69,7 +93,7 @@ namespace MusicCore
 
         public override string ToString()
         {
-            return $"{tone} = {tone / 12}";
+            return $"{new tone12(tone % 12)}{tone / 12}";
         }
     }
 
@@ -131,6 +155,35 @@ namespace MusicCore
         public static tone12 operator+(tone12 tone, int x)
         {
             return new tone12(correct(tone.tone+x));
+        }
+
+        public static int FromString(string st)
+        {
+            Debug.Assert(st.Length >= 1 && st.Length <= 2);
+            st = st.ToUpper();
+            Debug.Assert("CDEFGAB".IndexOf(st[0]) != -1);
+            int num;
+            switch(st[0])
+            {
+                case 'C': num = 0; break;
+                case 'D': num = 2; break;
+                case 'E': num = 4; break;
+                case 'F': num = 5; break;
+                case 'G': num = 7; break;
+                case 'A': num = 9; break;
+                case 'B': num = 11; break;
+                default: Debug.Fail($"{st[0]} is not a note!"); num = 0; break;
+            }
+            if (st.Length == 2)
+            {
+                if (st[1] == '#')
+                    num++;
+                else if (st[1] == 'b' || st[1] == '♭')
+                    num--;
+                else Debug.Fail($"{st[1]} is wrong modifier!");
+            }
+                
+            return num;
         }
 
         public override string ToString()

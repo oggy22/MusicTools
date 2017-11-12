@@ -187,13 +187,26 @@ namespace MusicComposer.Tests
         [TestMethod]
         public void GetHighestCommonSubHarmonicTest()
         {
-            ToneSet majorChord = new ToneSet(48, TwelveToneSet.majorTriad);
-            Assert.AreEqual<int>(24, majorChord.GetHighestCommonSubHarmonic());
+            ToneSet majorChord = new ToneSet("C4", TwelveToneSet.majorTriad);
+            Assert.AreEqual<int>(Tone.FromString("C2"), majorChord.GetHighestCommonSubHarmonic());
             Assert.AreEqual<int>(86, majorChord.GetLowestCommonHarmonic());
 
             ToneSet minorChord = new ToneSet(48, TwelveToneSet.minorTriad);
             Assert.AreEqual<int>(17, minorChord.GetHighestCommonSubHarmonic());
-            Assert.AreEqual<int>(86, minorChord.GetLowestCommonHarmonic());
+            Assert.AreEqual<int>(79, minorChord.GetLowestCommonHarmonic());
+        }
+
+        [TestMethod]
+        public void GetDisharmony()
+        {
+            ToneSet octave = new ToneSet(48, 60);
+            Assert.AreEqual<int>(12, octave.GetDisharmony(1, 1));
+
+            ToneSet twooctave2 = new ToneSet(48, 60, 72);
+            Assert.AreEqual<int>(12+12, twooctave2.GetDisharmony(1, 1));
+
+            ToneSet first3harms = new ToneSet(48, 60, 67);
+            Assert.AreEqual<int>(12 + 12 + 7, first3harms.GetDisharmony(1, 1));
         }
     }
 }
