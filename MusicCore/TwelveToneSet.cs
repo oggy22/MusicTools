@@ -411,6 +411,7 @@ namespace MusicCore
         }
         #endregion
 
+        #region Operations
         public void Add(int k)
         {
             Debug.Assert(!IsConst);
@@ -434,6 +435,7 @@ namespace MusicCore
             Debug.Assert(this[n] == false);
             this[n] = true;
         }
+        #endregion
 
         public TwelveToneSet MakeThirdChord(int startPos, int count)
         {
@@ -478,6 +480,26 @@ namespace MusicCore
             int octaves = k / Count;
             int tone = k % Count;
             return TWELVE * octaves + (int)FindNth(tone);
+        }
+
+        /// <summary>
+        /// For major and minor chords, optionally with some extra notes, get the root note.
+        /// </summary>
+        public tone12 GetRoot()
+        {
+            HashSet<int> roots = new HashSet<int>();
+
+            foreach (tone12 t in this)
+            {
+                if (tones[t + 7])
+                    if (tones[t + 3] ^ tones[t + 4])
+                        roots.Add(t);
+            }
+
+            if (roots.Count == 1)
+                return roots.Single();
+
+            return null;
         }
 
         #region Equals, Similar, CoveredBy
@@ -822,6 +844,7 @@ namespace MusicCore
             return st;
         }
 
+        #region IEnumerator implementation
         public IEnumerator<tone12> GetEnumerator()
         {
             for (int i = 0; i < TWELVE; i++)
@@ -833,6 +856,7 @@ namespace MusicCore
         {
             throw new NotImplementedException();
         }
+        #endregion
     }
 
     

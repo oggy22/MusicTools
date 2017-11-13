@@ -142,6 +142,11 @@ namespace MusicCore
             this.tone = correct(tone);
         }
 
+        public tone12(string st)
+        {
+            tone = FromString(st);
+        }
+
         public static implicit operator tone12(int tone)
         {
             return new tone12(tone);

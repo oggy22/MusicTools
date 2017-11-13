@@ -105,6 +105,29 @@ namespace MusicComposer.Tests
         }
 
         [TestMethod]
+        public void GetRootTest()
+        {
+            Assert.AreEqual<int>(0, TwelveToneSet.majorTriad.GetRoot());
+            Assert.AreEqual<int>(0, TwelveToneSet.major7.GetRoot());
+            Assert.AreEqual<int>(0, TwelveToneSet.minorTriad.GetRoot());
+            Assert.AreEqual<int>(new tone12("F"), TwelveToneSet.halfDiminished.GetRoot());
+
+            // No roots:
+            Assert.IsNull(TwelveToneSet.augmented.GetRoot());
+            Assert.IsNull(TwelveToneSet.chromatic.GetRoot());
+            Assert.IsNull(TwelveToneSet.fullDiminished.GetRoot());
+            // minor7 can be interpreted as major 6th, therefore two roots i.e. no roots
+            Assert.IsNull(TwelveToneSet.minor7.GetRoot());
+
+            // No roots for scales:
+            Assert.IsNull(TwelveToneSet.majorScale.GetRoot());
+            Assert.IsNull(TwelveToneSet.minorScale.GetRoot());
+            Assert.IsNull(TwelveToneSet.minorHarmonicScale.GetRoot());
+            Assert.IsNull(TwelveToneSet.minorMelodicScale.GetRoot());
+            Assert.IsNull(TwelveToneSet.chromatic.GetRoot());
+        }
+
+        [TestMethod]
         public void ShiftInScaleTest_InScale()
         {
             Assert.AreEqual(
@@ -203,7 +226,7 @@ namespace MusicComposer.Tests
             Assert.AreEqual<int>(12, octave.GetDisharmony(1, 1));
 
             ToneSet twooctave2 = new ToneSet(48, 60, 72);
-            Assert.AreEqual<int>(12+12, twooctave2.GetDisharmony(1, 1));
+            Assert.AreEqual<int>(12 + 12, twooctave2.GetDisharmony(1, 1));
 
             ToneSet first3harms = new ToneSet(48, 60, 67);
             Assert.AreEqual<int>(12 + 12 + 7, first3harms.GetDisharmony(1, 1));
