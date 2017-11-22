@@ -42,6 +42,16 @@ namespace MusicCore
 
         bool[] tones;
 
+        public void Add(int tone)
+        {
+            tones[tone] = true;
+        }
+
+        public void Remove(int tone)
+        {
+            tones[tone] = false;
+        }
+
         public Tone GetLowestCommonHarmonic()
         {
             List<IEnumerator<Tone>> iters = new List<IEnumerator<Tone>>();

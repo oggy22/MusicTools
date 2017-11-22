@@ -9,7 +9,7 @@ namespace MusicComposer
 {
     partial class Program
     {
-        static MidiOut midiOut = new MidiOut(0);
+        static MidiOut midiOut/* = new MidiOut(0)*/;
 
         static void Play(TwelveToneSet chord, int startFrom)
         {
@@ -95,6 +95,31 @@ namespace MusicComposer
             {
                 RandomSequencer();
                 return;
+            }
+            else if (args[0] == "midikeyboard")
+            {
+                MidiKeyboard midiKeyboard;
+                try
+                {
+                    midiKeyboard = new MidiKeyboard();
+                }
+                catch (NAudio.MmException e)
+                {
+                    Console.WriteLine("No midi keyboard detected");
+                    return;
+                }
+
+                midiKeyboard.toneDown += (tone) =>
+                {
+                    Console.Write(midiKeyboard.toneset.ToString() + " ");
+                    Console.Write(midiKeyboard.toneset.GetDisharmony());
+                    Console.WriteLine();
+                };
+                midiKeyboard.toneUp += (tone) =>
+                {
+                };
+
+                while (true) { }
             }
 
             MethodInfo miStatic = typeof(Compositions).GetMethod(args[0]);
