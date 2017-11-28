@@ -4,3 +4,5 @@ https://ismir2017.smcnus.org/
 Sound and Music Computing Conference:
 http://smc2017.aalto.fi/
 
+Mathematics and Computation in Music
+https://www.mcm2017.org/
