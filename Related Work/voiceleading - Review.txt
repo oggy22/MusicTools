@@ -1,0 +1,3 @@
+It is not clear how musical chords have non-Euclidian geometry.
+
+It is not clear why chords are called multisets rather then sets.
