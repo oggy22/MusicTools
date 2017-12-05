@@ -1,0 +1,13 @@
+Overall it feels that the article focuses more on the shortest grammar problem, rather than its applicaiton in music.
+
+Section 2
+The objection function is defined as the sum of the lenght of rules, the lenght of rule being its right side plus 1.
+|G|=Sum(|Ri|+1)
+This is exactly how the objection function is defined for compression problem as introducing a new rule has cost of |R|+1.
+However,since the problem is not compression, we should not be governed by its objectives. Therefore, I would probably define as:
+|G|=Sum(|Ri|)
+This will favor having more rules.
+
+Section 2.1
+In this section it's not quite clear how a musical piece is actually represented. It seems that it is chromatic, but not sure.
+Also, it's not clear if two passages are deemed similar if they are not in the same keys and/or transposed by a diatonic interval.
