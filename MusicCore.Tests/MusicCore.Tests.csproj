@@ -55,6 +55,7 @@
     <Compile Include="Melody\MelodyCompositeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TonesTest.cs" />
+    <Compile Include="ToneTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MusicCore\MusicCore.csproj">

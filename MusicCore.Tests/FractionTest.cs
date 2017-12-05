@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MusicCore;
 
-namespace Tests.MusicCore
+namespace MusicCore.Tests
 {
     [TestClass]
     public class FractionTest

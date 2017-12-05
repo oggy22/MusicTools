@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace MusicCore
@@ -15,6 +16,8 @@ namespace MusicCore
         public const int SECOND = 2;
 
         int tone;
+
+#region Constructors
         public Tone(int tone)
         {
             this.tone = tone;
@@ -25,6 +28,49 @@ namespace MusicCore
             tone = FromString(st);
         }
 
+        static Tone()
+        {
+            // Calculate frequencies
+            frequency = new double[256];
+            int initialTone = new Tone("A3");
+            frequency[initialTone] = 110;
+            double SemiToneRatio = Math.Pow(2.0, 1.0 / 12);
+            for (int i = initialTone + 1; i < frequency.Length; i++)
+                frequency[i] = frequency[i - 1] * SemiToneRatio;
+            for (int i = initialTone - 1; i >= 0; i--)
+                frequency[i] = frequency[i + 1] / SemiToneRatio;
+
+            // Calculate curve A
+            //https://en.wikipedia.org/wiki/A-weighting#Function_realisation_of_some_common_weightings
+            curveA = new double[256];
+            Func<double, double> sq = (double x) => x * x;
+            for (int i = 0; i < curveA.Length; i++)
+            {
+                double f = frequency[i];
+                double f2 = sq(f);
+                double f4 = sq(f2);
+                double Top = sq(12194) * f4;
+                double Bottom = (f2 + sq(20.6)) * Math.Sqrt((f2 + sq(107.7)) * (f2 + sq(737.9))) * (f2 + sq(12194));
+                double Ra = Top / Bottom;
+                double A = 20 * Math.Log10(Ra) + 2.0;
+                curveA[i] = A;
+            }
+        }
+#endregion
+
+        private static double[] frequency, curveA;
+
+        public double Frequency
+        {
+            get => frequency[tone];
+        }
+
+        public double CurveA
+        {
+            get => curveA[tone];
+        }
+
+        #region Static methods and static converters
         public static int FromString(string st)
         {
             int i = st.IndexOfAny(new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
@@ -78,6 +124,7 @@ namespace MusicCore
             for (int i = 4 * OCTAVE; ; i++)
                 yield return i;
         }
+        #endregion
 
         public IEnumerable<Tone> GetHarmonicsUp()
         {
