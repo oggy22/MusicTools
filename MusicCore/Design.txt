@@ -32,5 +32,3 @@ class FullInterval : FullTone
 {
 	operator
 }
-
-proba
