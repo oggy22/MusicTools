@@ -129,7 +129,7 @@ namespace MusicCore
             {
                 Fraction sum = new Fraction(0, 1);
                 foreach (var note in notes)
-                    sum += note.Item1.duration;
+                    sum += note.Item1.Duration;
 
                 return sum;
             }
@@ -150,7 +150,7 @@ namespace MusicCore
                 yield return new NoteWithDuration(
                     pair.Item1.note + coeffs[pair.Item2],
                     pair.Item1.alter,
-                    pair.Item1.duration);
+                    pair.Item1.Duration);
             }
         }
 

@@ -156,7 +156,13 @@ namespace MusicCore
         }
     }
 
-    public class TwelveToneSet : IEnumerable<tone12>
+    public class ConfiningSet
+    {
+        public int Range { get; }
+        public int NumberOfNotes { get; }
+    }
+
+    public class TwelveToneSet : IEnumerable<tone12>//, ConfiningSet
     {
         #region Constants
         public const int TWELVE = 12;

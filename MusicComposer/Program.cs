@@ -4,13 +4,12 @@ using NAudio.Midi;
 using System.Threading;
 using System.Reflection;
 using System.Collections.Generic;
+using static MusicCore.StaticAndExtensionMethods;
 
 namespace MusicComposer
 {
     partial class Program
     {
-        static MidiOut midiOut = new MidiOut(0);
-
         static void Play(TwelveToneSet chord, int startFrom)
         {
             for (int i=startFrom; i< TwelveToneSet.TWELVE + startFrom; i++)
@@ -91,6 +90,24 @@ namespace MusicComposer
                 return;
             }
 
+            if (args.Length == 2 && args[0] == "midi")
+            {
+                var list = MidiFileReader.Read(args[1]);
+                int previousNote = 0;
+                foreach (NoteWithDuration note in list[0])
+                {
+                    if (previousNote != 0)
+                        midiOut.Send(MidiMessage.StopNote(previousNote, 100, 1).RawData);
+
+                    previousNote = note.note;
+                    midiOut.Send(MidiMessage.StartNote(note.note, 100, 1).RawData);
+                    var fract = note.Duration;
+                    Thread.Sleep(15 * 1000 * fract.p / fract.q / 60);
+                }
+
+                return;
+            }
+
             if (args[0] == "RandomSequencer")
             {
                 RandomSequencer();
@@ -123,7 +140,7 @@ namespace MusicComposer
                     foreach (var note in lastnotes)
                         midiOut.Send(MidiMessage.StartNote(note, 0, 1).RawData);
 
-                Fraction fract = nwd.duration;
+                Fraction fract = nwd.Duration;
                 Console.Write(fract + " ");
                 Thread.Sleep(60 * 1000 * fract.p / fract.q / m12tone.tempo);
             }

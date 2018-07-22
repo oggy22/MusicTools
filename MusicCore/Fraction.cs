@@ -74,10 +74,15 @@ namespace MusicCore
         }
         #endregion
 
-        static public explicit operator int(Fraction fract)
+        static public implicit operator int(Fraction fract)
         {
             Debug.Assert(fract.q == 1);
             return fract.p;
+        }
+
+        static public implicit operator Fraction(int n)
+        {
+            return new Fraction(n, 1);
         }
 
         public override string ToString()

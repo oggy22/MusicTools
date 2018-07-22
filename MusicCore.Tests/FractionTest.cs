@@ -6,7 +6,7 @@ namespace MusicCore.Tests
     public class FractionTest
     {
         [TestMethod]
-        public void Ctrs()
+        public void FractionCtrs()
         {
             Fraction fract = new Fraction(4, 6);
             Assert.AreEqual(2, fract.p);

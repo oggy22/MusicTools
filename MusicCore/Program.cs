@@ -2,13 +2,6 @@
 
 namespace MusicCore
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-        }
-    }
-
     public abstract class Scale
     {
         public abstract int this[int k] { get; }

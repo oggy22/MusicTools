@@ -50,7 +50,7 @@ namespace MusicCore
                 yield return Transform(notewd, note =>
                     new NoteWithDuration(
                     note.IsPause ? Note.PAUSE : key + toneset.Calculate(note.note) + (int)note.alter,
-                    note.duration));
+                    note.Duration));
             }
         }
     }
@@ -134,10 +134,10 @@ namespace MusicCore
                     {
                         Alteration alter = (Alteration)((int)currNote.alter + (int)seq[currNote.note].alter);
                         if (noteReturn == null)
-                            noteReturn = noteTail = new NoteWithDuration(number, alter, note.duration);
+                            noteReturn = noteTail = new NoteWithDuration(number, alter, note.Duration);
                         else
                         {
-                            noteTail.otherNote = new NoteWithDuration(number, alter, note.duration);
+                            noteTail.otherNote = new NoteWithDuration(number, alter, note.Duration);
                             noteTail = noteTail.otherNote as NoteWithDuration;
                         }
 

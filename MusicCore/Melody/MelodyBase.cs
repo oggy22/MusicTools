@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -14,8 +15,14 @@ namespace MusicCore
         public bool IsPause => note == PAUSE;
         public Note otherNote;
 
+        public Note() : this(PAUSE)
+        {
+        }
+
         public Note(int note, Alteration alter = Alteration.Natural)
         {
+            Debug.Assert(-128 <= note && note < 128 || note==PAUSE);
+
             this.note = note;
             this.alter = alter;
         }
@@ -52,6 +59,9 @@ namespace MusicCore
 
         public string NoteToString()
         {
+            if (IsPause)
+                return "Pause";
+
             return string.Format($"{note}{StAlter(alter)}");
         }
 
@@ -61,9 +71,18 @@ namespace MusicCore
         }
     }
 
-    public class NoteWithDuration : Note, IEquatable<NoteWithDuration>
+    public class NoteWithDuration : Note, IEquatable<NoteWithDuration>, IMelodyPart
     {
-        public readonly Fraction duration;
+        private readonly Fraction duration;
+
+        public Fraction Duration => duration;
+
+        Fraction IMelodyPart.duration => duration;
+
+        public NoteWithDuration(Fraction duration) : base()
+        {
+            this.duration = duration;
+        }
 
         public NoteWithDuration(int note, Alteration alter, Fraction duration) : base(note, alter)
         {
@@ -73,6 +92,14 @@ namespace MusicCore
 
         public NoteWithDuration(int note, Fraction duration) : this(note, Alteration.Natural, duration)
         {
+        }
+
+        public static NoteWithDuration operator +(NoteWithDuration note, int offset)
+        {
+            if (note.IsPause)
+                return new NoteWithDuration(note.duration);
+
+            return new NoteWithDuration(note.note + offset, note.alter, note.duration);
         }
 
         static public NoteWithDuration MakePause(Fraction duration)
@@ -102,6 +129,16 @@ namespace MusicCore
             NoteWithDuration node = obj as NoteWithDuration;
             if (node == null) return false;
             return Equals(node);
+        }
+
+        public override int GetHashCode()
+        {
+            return note.GetHashCode() + duration.GetHashCode();
+        }
+
+        IEnumerable<NoteWithDuration> IMelodyPart.GetNotes()
+        {
+            yield return this;
         }
     }
 

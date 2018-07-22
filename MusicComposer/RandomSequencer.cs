@@ -54,10 +54,10 @@ namespace MusicComposer
                     break;
                 }
 
-                midiOut.Send(MidiMessage.StartNote(tone, 100, 1).RawData);
+                StaticAndExtensionMethods.midiOut.Send(MidiMessage.StartNote(tone, 100, 1).RawData);
                 Console.Write(new tone12(tone).ToString() + " ");
                 list.Add(tone);
-                midiOut.Send(MidiMessage.StartNote(lastTone, 0, 1).RawData);
+                StaticAndExtensionMethods.midiOut.Send(MidiMessage.StartNote(lastTone, 0, 1).RawData);
                 lastTone = tone;
                 Thread.Sleep(200);
             }

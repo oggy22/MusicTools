@@ -19,7 +19,7 @@ namespace MusicCore
         public override Fraction StartPause => components[0].melody.StartPause;
 
         public override IEnumerable<NoteWithDuration> Anacrusis => components[0].melody.Anacrusis.Select(
-            nwd => new NoteWithDuration(nwd.note + components[0].alterations[0], nwd.duration));
+            nwd => new NoteWithDuration(nwd.note + components[0].alterations[0], nwd.Duration));
 
         public override Fraction Duration
         {
@@ -39,15 +39,15 @@ namespace MusicCore
             {
                 Fraction fractSum = component.melody.Duration;
                 foreach (var nwd in component.melody.Anacrusis)
-                    fractSum = fractSum - nwd.duration;
+                    fractSum = fractSum - nwd.Duration;
 
                 Debug.Assert(fractSum.p > 0);
                 foreach (var nwd in current)
                 {
-                    fractSum = fractSum - nwd.duration;
+                    fractSum = fractSum - nwd.Duration;
                     if (fractSum.p < 0)
                     {
-                        Fraction dur = nwd.duration + fractSum;
+                        Fraction dur = nwd.Duration + fractSum;
                         Debug.Assert(dur.p > 0);
                         yield return new NoteWithDuration(nwd.note, dur);
                         break;
@@ -57,7 +57,7 @@ namespace MusicCore
                         break;
                 }
                 foreach (var nwd in component.melody.Anacrusis)
-                    yield return new NoteWithDuration(nwd.note + component.alterations[0], nwd.duration);
+                    yield return new NoteWithDuration(nwd.note + component.alterations[0], nwd.Duration);
 
                 current = new List<NoteWithDuration>();
 
@@ -68,7 +68,7 @@ namespace MusicCore
                 {
                     // todo: this might be a kludge
                     int alter = component.alterations.Length == 1 ? component.alterations[0] : 0;
-                    current.Add(new NoteWithDuration(nwd.note + alter, nwd.duration));
+                    current.Add(new NoteWithDuration(nwd.note + alter, nwd.Duration));
                 }
             }
 
