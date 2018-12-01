@@ -37,8 +37,6 @@ namespace MusicCore
         static NoteWithDuration Transform(NoteWithDuration note, Func<NoteWithDuration, NoteWithDuration> trans)
         {
             NoteWithDuration noteReturn = trans(note);
-            if (note.otherNote != null)
-                noteReturn.otherNote = Transform(note.otherNote as NoteWithDuration, trans);
 
             return noteReturn;
         }
@@ -127,7 +125,7 @@ namespace MusicCore
 
                     Note currNote = note;
 
-                    NoteWithDuration noteReturn = null, noteTail = null;
+                    NoteWithDuration? noteReturn = null, noteTail = null;
 
 
                     do
@@ -137,14 +135,14 @@ namespace MusicCore
                             noteReturn = noteTail = new NoteWithDuration(number, alter, note.Duration);
                         else
                         {
-                            noteTail.otherNote = new NoteWithDuration(number, alter, note.Duration);
-                            noteTail = noteTail.otherNote as NoteWithDuration;
+                            //noteTail.va.otherNote = new NoteWithDuration(number, alter, note.Duration);
+                            //noteTail = noteTail.otherNote as NoteWithDuration;
                         }
 
-                        currNote = currNote.otherNote;
-                    } while (currNote != null);
+                        //currNote = currNote.otherNote;
+                    } while (false);
 
-                    yield return noteReturn;
+                    yield return noteReturn.Value;
                 }
             }
         }

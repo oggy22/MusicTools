@@ -12,7 +12,7 @@ namespace MusicCore.Tests.Melody
             MelodyBase melody = new MelodyAtomic(new object[] { 0, 1, 2, 0 });
             MelodyComposite composite = new MelodyComposite("AA+", melody);
 
-            NoteList noteList = new NoteList(new object[] { 0, 1, 2, 0, 1, 2, 3, 1 });
+            NoteList noteList = new NoteList(new int[] { 0, 1, 2, 0, 1, 2, 3, 1 });
             EqualNotes(noteList, composite);
         }
 
@@ -26,6 +26,7 @@ namespace MusicCore.Tests.Melody
                 Assert.AreEqual(note.alter, enumerator.Current.alter);
                 Assert.AreEqual(note.IsPause, enumerator.Current.IsPause);
             }
+
             Assert.IsFalse(enumerator.MoveNext());
         }
     }

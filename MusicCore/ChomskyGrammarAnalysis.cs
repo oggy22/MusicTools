@@ -9,7 +9,7 @@ namespace MusicCore
         public MelodyPartList part;
         public int index;
         public IMelodyPart MelodyPart => part[index];
-        public NoteWithDuration note => part[index] as NoteWithDuration;
+        public NoteWithDuration note => (NoteWithDuration)part[index];
 
         public void AssertCorrect()
         {

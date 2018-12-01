@@ -133,8 +133,8 @@ namespace MusicComposer
                     {
                         midiOut.Send(MidiMessage.StartNote(note.note, 100, 1).RawData);
                         lastnotes.Add(note.note);
-                        note = note.otherNote;
-                    } while (note != null);
+                        //note = note.otherNote;
+                    } while (false /*note != null*/);
                 }
                 else
                     foreach (var note in lastnotes)

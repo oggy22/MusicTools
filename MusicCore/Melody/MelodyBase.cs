@@ -7,17 +7,12 @@ namespace MusicCore
 {
     public enum Alteration { Flat=-1, Natural = 0, Sharp = 1}
 
-    public class Note
+    public struct Note
     {
         public readonly int note;
         public readonly Alteration alter;
         public const int PAUSE = int.MinValue;
         public bool IsPause => note == PAUSE;
-        public Note otherNote;
-
-        public Note() : this(PAUSE)
-        {
-        }
 
         public Note(int note, Alteration alter = Alteration.Natural)
         {
@@ -25,6 +20,7 @@ namespace MusicCore
 
             this.note = note;
             this.alter = alter;
+            //otherNote = null;
         }
 
         public Note(string st)
@@ -33,7 +29,7 @@ namespace MusicCore
 
             if (index != -1)
             {
-                otherNote = new Note(st.Substring(index + 1));
+                //otherNote = new Note(st.Substring(index + 1));
                 st = st.Substring(0, index);
             }
 
@@ -69,29 +65,46 @@ namespace MusicCore
         {
             return NoteToString();
         }
+
+        static public implicit operator Note(NoteWithDuration nwd)
+        {
+            return new Note(nwd.note, nwd.alter);
+        }
     }
 
-    public class NoteWithDuration : Note, IEquatable<NoteWithDuration>, IMelodyPart
+    public struct NoteWithDuration : IEquatable<NoteWithDuration>, IMelodyPart
     {
+        public readonly int note;
+        public readonly Alteration alter;
+        public const int PAUSE = int.MinValue;
+        public bool IsPause => note == PAUSE;
+
         private readonly Fraction duration;
 
         public Fraction Duration => duration;
 
         Fraction IMelodyPart.duration => duration;
 
-        public NoteWithDuration(Fraction duration) : base()
+        public NoteWithDuration(Fraction duration)
         {
+            note = PAUSE;
+            alter = Alteration.Flat;
             this.duration = duration;
         }
 
-        public NoteWithDuration(int note, Alteration alter, Fraction duration) : base(note, alter)
+        public NoteWithDuration(int note, Alteration alter, Fraction duration)
         {
+            this.note = note;
+            this.alter = alter;
             Debug.Assert(duration.p > 0);
             this.duration = duration;
         }
 
-        public NoteWithDuration(int note, Fraction duration) : this(note, Alteration.Natural, duration)
+        public NoteWithDuration(int note, Fraction duration)
         {
+            this.note = note;
+            this.alter = Alteration.Natural;
+            this.duration = duration;
         }
 
         public static NoteWithDuration operator +(NoteWithDuration note, int offset)
@@ -114,7 +127,7 @@ namespace MusicCore
 
         public override string ToString()
         {
-            return $"{NoteToString()}:{duration}";
+            return $"{note}{alter}:{duration}";
         }
 
         public bool Equals(NoteWithDuration other)
@@ -124,12 +137,12 @@ namespace MusicCore
                 alter == other.alter;
         }
 
-        public override bool Equals(object obj)
-        {
-            NoteWithDuration node = obj as NoteWithDuration;
-            if (node == null) return false;
-            return Equals(node);
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    NoteWithDuration node = obj as NoteWithDuration;
+        //    if (node == null) return false;
+        //    return Equals(node);
+        //}
 
         public override int GetHashCode()
         {
@@ -169,16 +182,16 @@ namespace MusicCore
                 notes.Add(new Note(i));
         }
 
-        public NoteList(object[] objs)
-        {
-            notes = new List<Note>();
-            foreach (object obj in objs)
-            {
-                if (obj is int) notes.Add(new Note((int)obj));
-                else if (obj is Note) notes.Add(obj as Note);
-                else Debug.Fail("unrecognized");
-            }
-        }
+        //public NoteList(object[] objs)
+        //{
+        //    notes = new List<Note>();
+        //    foreach (object obj in objs)
+        //    {
+        //        if (obj is int) notes.Add(new Note((int)obj));
+        //        else if (obj is Note) notes.Add(obj as Note);
+        //        else Debug.Fail("unrecognized");
+        //    }
+        //}
 
         public IEnumerable<Note> Notes() => notes;
     }

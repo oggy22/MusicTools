@@ -37,7 +37,6 @@ namespace MusicCore
                 {
                     Note note = new Note(notes[i] as string);
                     NoteWithDuration notewd = new NoteWithDuration(note.note, note.alter, fract);
-                    notewd.otherNote = note.otherNote;
                     yield return notewd;
                 }
                 else
