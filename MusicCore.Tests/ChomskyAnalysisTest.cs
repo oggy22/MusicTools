@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.Linq;
-//using MSTest.TestFramework;
 
 namespace MusicCore.Tests
 {
@@ -17,7 +17,11 @@ namespace MusicCore.Tests
         {
             var lists = MidiFileReader.Read(filename);
 
+            var copy = FlatCopy(lists);
+            AssertEqual(lists, copy);
+
             ChomskyGrammarAnalysis.Reduce(lists);
+            AssertEqual(lists, copy);
         }
 
         [DataRow(@"Resources\Mozart_Symphony40_Allegro.mid")]
@@ -26,7 +30,38 @@ namespace MusicCore.Tests
         {
             var lists = MidiFileReader.Read(filename).Take(2).ToList();
 
+            var copy = FlatCopy(lists);
+            AssertEqual(lists, copy);
+
             ChomskyGrammarAnalysis.Reduce(lists);
+            AssertEqual(lists, copy);
         }
+
+
+        #region Helper methods
+        static void AssertEqual(IEnumerable<MelodyPartList> lists1, IEnumerable<MelodyPartList> lists2)
+        {
+            var enumerator = lists1.GetEnumerator();
+            foreach (var mpl in lists2)
+            {
+                Assert.IsTrue(enumerator.MoveNext());
+
+                var mplCopy = enumerator.Current;
+                Assert.IsTrue(mpl.GetNotes().SequenceEqual(mplCopy.GetNotes()));
+            }
+
+            Assert.IsFalse(enumerator.MoveNext());
+        }
+
+        static List<MelodyPartList> FlatCopy(List<MelodyPartList> lists) =>
+            lists.ConvertAll(mpl =>
+            {
+                MelodyPartList mplCopy = new MelodyPartList();
+                foreach (var nwd in mpl)
+                    mplCopy.Add(nwd);
+
+                return mplCopy;
+            });
+        #endregion
     }
 }
