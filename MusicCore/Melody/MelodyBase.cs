@@ -79,17 +79,15 @@ namespace MusicCore
         public const int PAUSE = int.MinValue;
         public bool IsPause => note == PAUSE;
 
-        private readonly Fraction duration;
+        public Fraction Duration { get; }
 
-        public Fraction Duration => duration;
-
-        Fraction IMelodyPart.duration => duration;
+        Fraction IMelodyPart.duration => Duration;
 
         public NoteWithDuration(Fraction duration)
         {
             note = PAUSE;
-            alter = Alteration.Flat;
-            this.duration = duration;
+            alter = Alteration.Natural;
+            this.Duration = duration;
         }
 
         public NoteWithDuration(int note, Alteration alter, Fraction duration)
@@ -97,22 +95,22 @@ namespace MusicCore
             this.note = note;
             this.alter = alter;
             Debug.Assert(duration.p > 0);
-            this.duration = duration;
+            this.Duration = duration;
         }
 
         public NoteWithDuration(int note, Fraction duration)
         {
             this.note = note;
             this.alter = Alteration.Natural;
-            this.duration = duration;
+            this.Duration = duration;
         }
 
         public static NoteWithDuration operator +(NoteWithDuration note, int offset)
         {
             if (note.IsPause)
-                return new NoteWithDuration(note.duration);
+                return new NoteWithDuration(note.Duration);
 
-            return new NoteWithDuration(note.note + offset, note.alter, note.duration);
+            return new NoteWithDuration(note.note + offset, note.alter, note.Duration);
         }
 
         static public NoteWithDuration MakePause(Fraction duration)
@@ -127,26 +125,24 @@ namespace MusicCore
 
         public override string ToString()
         {
-            return $"{note}{alter}:{duration}";
+            string stNote = note == PAUSE ? "PAUSE" : note.ToString();
+            string stAlter = "";
+            if (alter != Alteration.Natural)
+                stAlter = alter == Alteration.Flat ? "b" : "#";
+
+            return $"{stNote}{stAlter}:{Duration}";
         }
 
         public bool Equals(NoteWithDuration other)
         {
-            return duration == other.duration &&
+            return Duration == other.Duration &&
                 note == other.note &&
                 alter == other.alter;
         }
 
-        //public override bool Equals(object obj)
-        //{
-        //    NoteWithDuration node = obj as NoteWithDuration;
-        //    if (node == null) return false;
-        //    return Equals(node);
-        //}
-
         public override int GetHashCode()
         {
-            return note.GetHashCode() + duration.GetHashCode();
+            return note.GetHashCode() + Duration.GetHashCode();
         }
 
         IEnumerable<NoteWithDuration> IMelodyPart.GetNotes()

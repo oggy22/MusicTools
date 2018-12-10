@@ -12,7 +12,7 @@ namespace MusicCore
 
             for (int track = 0; track < midi.Tracks; track++)
             {
-                MelodyPartList list = new MelodyPartList();
+                MelodyPartList list = new MelodyPartList(MelodyPartList.Type.Voice);
                 foreach (MidiEvent midievent in midi.Events[track])
                 {
                     if (midievent is NoteOnEvent noteonevent)

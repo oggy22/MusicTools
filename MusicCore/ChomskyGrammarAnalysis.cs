@@ -66,11 +66,17 @@ namespace MusicCore
 
     public static class ChomskyGrammarAnalysis
     {
-        public static void Reduce(List<MelodyPartList> melodyPartLists)
+        /// <summary>
+        /// Perfomrs Chomsky analysis and reduces the list, similar to compression.
+        /// </summary>
+        /// <param name="melodyPartNodes">All nodes including input and all produced nodes</param>
+        public static List<MelodyPartList> Reduce(List<MelodyPartList> melodyPartNodes)
         {
+            List<MelodyPartList> allNodes = new List<MelodyPartList>(melodyPartNodes);
+
             int maxListCount = int.MaxValue;
 
-            Swap swap = FindLongestSwap(melodyPartLists);
+            Swap swap = FindLongestSwap(melodyPartNodes);
             int count = 500;
 
             while (swap.list.Count > 2)
@@ -82,12 +88,11 @@ namespace MusicCore
                 maxListCount = swap.list.Count;
 
                 // If there is identical list already, don't add it, use the identical one
-                if (melodyPartLists.Find(l => l.Equals(swap.list)) == null)
-                {
-                    //todo
-                }
+                MelodyPartList nodeExisting;
+                if ((nodeExisting = allNodes.Find(node => node.IsIdentical(swap.list))) != null)
+                    swap.list = nodeExisting;
                 else
-                    melodyPartLists.Add(swap.list);
+                    allNodes.Add(swap.list);
 
                 //Assert that at most one part is whole
                 if (swap.IsWhole1 && swap.IsWhole2)
@@ -97,25 +102,64 @@ namespace MusicCore
                 swap.pnt1.part.RemoveRange(swap.pnt1.index, swap.list.Count);
                 swap.pnt1.part.Insert(swap.pnt1.index, new MelodyPart(offset1, swap.list));
 
-                // If it's the same part, adjust the pnt2.index 
-                if (swap.pnt1.part == swap.pnt2.part)
-                    swap.pnt2.index -= swap.list.Count - 1;
+                if (!swap.IsWhole2)
+                {
+                    // If it's the same part, adjust the pnt2.index 
+                    if (swap.pnt1.part == swap.pnt2.part)
+                        swap.pnt2.index -= swap.list.Count - 1;
 
-                int offset2 = swap.pnt2.MelodyPart.GetNotes().First().note;
-                swap.pnt2.part.RemoveRange(swap.pnt2.index, swap.list.Count);
-                swap.pnt2.part.Insert(swap.pnt2.index, new MelodyPart(offset2, swap.list));
+                    int offset2 = swap.pnt2.MelodyPart.GetNotes().First().note;
+                    swap.pnt2.part.RemoveRange(swap.pnt2.index, swap.list.Count);
+                    swap.pnt2.part.Insert(swap.pnt2.index, new MelodyPart(offset2, swap.list));
+                }
 
                 if (--count <= 0)
                     break;
 
                 // Next swap
-                swap = FindLongestSwap(melodyPartLists);
+                swap = FindLongestSwap(allNodes);
             };
 
-            foreach (var list in melodyPartLists)
+            foreach (var list in melodyPartNodes)
                 Debug.Assert(list.RecursiveCount > 1);
+
+            return allNodes;
         }
 
+        [Conditional("DEBUG")]
+        public static void Print(List<MelodyPartList> melodyPartLists)
+        {
+            Debug.WriteLine("ITERATION:");
+            foreach (var mpl in melodyPartLists)
+                Debug.WriteLine(mpl.ToString());
+
+            Debug.WriteLine("");
+        }
+
+        public static void PostAnalysis(List<MelodyPartList> melodyPartLists)
+        {
+            foreach (MelodyPartList mpl in melodyPartLists)
+            {
+                HashSet<MelodyPartList> mpls = new HashSet<MelodyPartList>();
+                UpdateLowerRecursive(mpl, mpls);
+
+                foreach (var m in mpls)
+                    m.TotalVoices++;
+            }
+        }
+
+        private static void UpdateLowerRecursive(MelodyPartList mpl, HashSet<MelodyPartList> mplVoices)
+        {
+            mpl.TotalOccurances++;
+            mplVoices.Add(mpl);
+
+            foreach (var childNode in mpl.GetChildren())
+                UpdateLowerRecursive(childNode, mplVoices);
+        }
+
+        /// <summary>
+        /// Potential swap containing 2 pointers and the node/melody
+        /// </summary>
         internal struct Swap
         {
             public MelodyPartPointer pnt1, pnt2;
@@ -164,7 +208,7 @@ namespace MusicCore
 
         internal static Swap FindLongestSwap(List<MelodyPartList> melodyPartLists)
         {
-            Swap longestSwap = new Swap() { list = new MelodyPartList() };
+            Swap longestSwap = new Swap() { list = new MelodyPartList(MelodyPartList.Type.Melody) };
 
             foreach (MelodyPartPointer pntLeft in GetMelodyPartPointers(melodyPartLists))
             {
@@ -216,7 +260,7 @@ namespace MusicCore
 
         private static MelodyPartList FindLongestMelodyPartList(MelodyPartPointer pnt1, MelodyPartPointer pnt2)
         {
-            MelodyPartList list = new MelodyPartList();
+            MelodyPartList list = new MelodyPartList(MelodyPartList.Type.Melody);
             var pnt1Start = pnt1;
             var pnt2Start = pnt2;
             while (pnt1.MelodyPart is NoteWithDuration note1 && pnt2.MelodyPart is NoteWithDuration note2)

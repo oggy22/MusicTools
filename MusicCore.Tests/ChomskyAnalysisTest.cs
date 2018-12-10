@@ -15,28 +15,33 @@ namespace MusicCore.Tests
         [DataTestMethod]
         public void Bach_inventions(string filename)
         {
-            var lists = MidiFileReader.Read(filename);
-
-            var copy = FlatCopy(lists);
-            AssertEqual(lists, copy);
-
-            ChomskyGrammarAnalysis.Reduce(lists);
-            AssertEqual(lists, copy);
+            Test(filename, 2);
         }
 
         [DataRow(@"Resources\Mozart_Symphony40_Allegro.mid")]
         [DataTestMethod]
         public void Mozart_Symphony40_Allegro(string filename)
         {
-            var lists = MidiFileReader.Read(filename).Take(2).ToList();
+            Test(filename, 2);
+        }
 
+        private void Test(string filename, int take)
+        {
+            var lists = MidiFileReader.Read(filename).Take(take).ToList();
+
+            // Save copy
             var copy = FlatCopy(lists);
             AssertEqual(lists, copy);
 
-            ChomskyGrammarAnalysis.Reduce(lists);
+            // Perform Chomsky reduction
+            var allNodes = ChomskyGrammarAnalysis.Reduce(lists);
             AssertEqual(lists, copy);
-        }
 
+            // Post analysis
+            ChomskyGrammarAnalysis.PostAnalysis(lists);
+            ChomskyGrammarAnalysis.Print(allNodes);
+            CheckPostAnalysis(allNodes, lists.Count);
+        }
 
         #region Helper methods
         static void AssertEqual(IEnumerable<MelodyPartList> lists1, IEnumerable<MelodyPartList> lists2)
@@ -56,12 +61,33 @@ namespace MusicCore.Tests
         static List<MelodyPartList> FlatCopy(List<MelodyPartList> lists) =>
             lists.ConvertAll(mpl =>
             {
-                MelodyPartList mplCopy = new MelodyPartList();
-                foreach (var nwd in mpl)
-                    mplCopy.Add(nwd);
+                MelodyPartList mplCopy = new MelodyPartList(mpl);
 
                 return mplCopy;
             });
+
+        private void CheckPostAnalysis(List<MelodyPartList> lists, int numberOfLines)
+        {
+            // Top-nodes total occurances == 1
+            for (int i = 0; i < numberOfLines; i++)
+                Assert.AreEqual(1, lists[i].TotalOccurances);
+
+            // Non-top-nodes total occurances >= 2, start with 0
+            for (int i = numberOfLines; i < lists.Count; i++)
+            {
+                Assert.IsTrue(lists[i].TotalOccurances >= 2);
+                Assert.AreEqual(0, lists[i].GetNotes().First().note);
+            }
+
+            // Child total occurances > parent total occurances
+            foreach (var list in lists)
+                foreach (var child in list.GetChildren())
+                    Assert.IsTrue(child.TotalOccurances > list.TotalOccurances);
+
+            // At least two elements
+            foreach (var list in lists)
+                Assert.IsTrue(list.Count >= 2);
+        }
         #endregion
     }
 }

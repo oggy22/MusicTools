@@ -14,35 +14,77 @@ namespace MusicCore
 
     public class MelodyPart : IMelodyPart
     {
-        protected int offset;
+        private int offset;
 
-        protected MelodyPartList list;
+        internal MelodyPartList node;
 
-        public MelodyPart(int offset, MelodyPartList list)
+        public MelodyPart(int offset, MelodyPartList node)
         {
             this.offset = offset;
-            this.list = list;
+            this.node = node;
         }
 
         public Fraction duration => throw new System.NotImplementedException();
 
         public IEnumerable<NoteWithDuration> GetNotes()
         {
-            foreach (var part in list)
+            foreach (var part in node)
                 foreach (var note in part.GetNotes())
                     yield return note + offset;
         }
 
         public void PlayRecursive(int offset)
         {
-            list.PlayRecursive(this.offset + offset);
+            node.PlayRecursive(this.offset + offset);
         }
     }
 
     public class MelodyPartList : List<IMelodyPart>
     {
-        //todo: add int stepsPerOctave;
+        private static int idVoice = 0, idMelody = 0;
+        public readonly string stId;
 
+        public enum Type { Voice, Melody }
+
+        public MelodyPartList(Type type)
+        {
+            switch (type)
+            {
+                case Type.Melody: stId = $"Melody {++idMelody}"; return;
+                case Type.Voice: stId = $"Voice {++idVoice}"; return;
+                default: Debug.Fail($"Unrecognized {type}"); return;
+            }
+        }
+
+        /// <summary>
+        /// Flat copy constructor
+        /// </summary>
+        public MelodyPartList(MelodyPartList mpl)
+        {
+            this.stId = mpl.stId + " copy";
+
+            foreach (var nwd in mpl)
+                Add(nwd);
+        }
+
+        public override string ToString()
+        {
+            string st =  $"{stId}: Notes = {this.GetNotes().Count()}; Total occurances={TotalOccurances}; Voices={TotalVoices}; ";
+
+            foreach (var impl in this)
+            {
+                if (impl is NoteWithDuration nwd)
+                    st += $"{nwd},";
+                else if (impl is MelodyPart mp)
+                    st += $"{mp.node.stId},";
+                else
+                    Debug.Fail("Unrecognized part");
+            }
+
+            return st;
+        }
+
+        //todo: add int stepsPerOctave;
         Fraction duration
         {
             get
@@ -50,9 +92,19 @@ namespace MusicCore
                 Fraction sum = 0;
                 foreach (var el in this)
                     sum += el.duration;
+
                 return sum;
             }
         }
+
+        public bool IsIdentical(MelodyPartList node) => this.SequenceEqual(node);
+
+        public bool IsLeaf() => !GetChildren().Any();
+
+        public IEnumerable<MelodyPartList> GetChildren() =>
+            this
+            .OfType<MelodyPart>()
+            .Select(imp => imp.node);
 
         public int RecursiveCount => GetNotes().Count();
 
@@ -62,6 +114,10 @@ namespace MusicCore
                 foreach (var note in mp.GetNotes())
                     yield return note;
         }
+
+        public int TotalOccurances { get; set; }
+
+        public int TotalVoices { get; set; }
 
         public void Play(int offset = 0)
         {
