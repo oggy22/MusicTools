@@ -3,12 +3,12 @@ using System.Diagnostics;
 
 namespace MusicCore
 {
-    public struct Fraction : IEquatable<Fraction>
+    public struct Fraction
     {
         static public readonly Fraction ZERO = new Fraction(0, 1);
 
-        public int p { get; }
-        public int q { get; }
+        //Invariant: p and q are always co-prime
+        public readonly int p, q;
 
         public Fraction(int p, int q)
         {
@@ -92,19 +92,14 @@ namespace MusicCore
             return $"{p}/{q}";
         }
 
-        public bool Equals(Fraction other)
-        {
-            return p == other.p && q == other.q;
-        }
-
         public static bool operator ==(Fraction f1, Fraction f2)
         {
-            return f1.Equals(f2);
+            return f1.p == f2.p && f1.q == f2.q;
         }
 
         public static bool operator !=(Fraction f1, Fraction f2)
         {
-            return !f1.Equals(f2);
+            return f1.p != f2.p || f1.q != f2.q;
         }
     }
 }

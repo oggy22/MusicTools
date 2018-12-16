@@ -42,16 +42,19 @@ namespace MusicCore
     public class MelodyPartList : List<IMelodyPart>
     {
         private static int idVoice = 0, idMelody = 0;
-        public readonly string stId;
+        public readonly int id;
 
-        public enum Type { Voice, Melody }
+        public enum Type { Voice, Melody, Copy }
+        public Type type;
 
         public MelodyPartList(Type type)
         {
+            this.type = type;
+
             switch (type)
             {
-                case Type.Melody: stId = $"Melody {++idMelody}"; return;
-                case Type.Voice: stId = $"Voice {++idVoice}"; return;
+                case Type.Melody: id = ++idMelody; return;
+                case Type.Voice: id = ++idVoice; return;
                 default: Debug.Fail($"Unrecognized {type}"); return;
             }
         }
@@ -61,7 +64,7 @@ namespace MusicCore
         /// </summary>
         public MelodyPartList(MelodyPartList mpl)
         {
-            this.stId = mpl.stId + " copy";
+            this.type = Type.Copy;
 
             foreach (var nwd in mpl)
                 Add(nwd);
@@ -69,14 +72,14 @@ namespace MusicCore
 
         public override string ToString()
         {
-            string st =  $"{stId}: Notes = {this.GetNotes().Count()}; Total occurances={TotalOccurances}; Voices={TotalVoices}; ";
+            string st =  $"{type}/{id}: Notes = {this.GetNotes().Count()}; Total occurances={TotalOccurances}; Voices={TotalVoices}; ";
 
             foreach (var impl in this)
             {
                 if (impl is NoteWithDuration nwd)
                     st += $"{nwd},";
                 else if (impl is MelodyPart mp)
-                    st += $"{mp.node.stId},";
+                    st += $"{mp.node.type}/{id}{mp.node.id},";
                 else
                     Debug.Fail("Unrecognized part");
             }
