@@ -8,6 +8,10 @@ namespace MusicCore
     {
         public MelodyPartList part;
         public int index;
+        public int lastNoteIndex;
+
+        public int MaxLength => lastNoteIndex + 1 - index;
+
         public IMelodyPart MelodyPart => part[index];
         public NoteWithDuration note => (NoteWithDuration)part[index];
 
@@ -17,15 +21,40 @@ namespace MusicCore
             Debug.Assert(index < part.Count);
         }
 
+        public MelodyPartPointer(MelodyPartList part, int index)
+        {
+            this.part = part;
+            this.index = index;
+            Debug.Assert(part[index] is NoteWithDuration);
+
+            lastNoteIndex = index+1;
+            while (lastNoteIndex < part.Count && part[lastNoteIndex] is NoteWithDuration)
+            {
+                lastNoteIndex++;
+            }
+
+            lastNoteIndex--;
+
+            Debug.Assert(part[lastNoteIndex] is NoteWithDuration);
+        }
+
+        public MelodyPartPointer(MelodyPartList part, int index, int lastNoteIndex)
+        {
+            this.part = part;
+            this.index = index;
+            Debug.Assert(part[index] is NoteWithDuration);
+
+            this.lastNoteIndex = lastNoteIndex;
+            Debug.Assert(part[lastNoteIndex] is NoteWithDuration);
+        }
+
         public override bool Equals(object obj)
         {
             if (!(obj is MelodyPartPointer pnt))
-            {
                 return false;
-            }
 
-            return pnt.part == part && pnt.index == index;
-       }
+            return this == pnt;
+        }
 
         /// <summary>
         /// Increments the pointer to the next element
@@ -212,19 +241,24 @@ namespace MusicCore
 
             foreach (MelodyPartPointer pntLeft in GetMelodyPartPointers(melodyPartLists))
             {
-                if (!(pntLeft.MelodyPart is NoteWithDuration note))
-                    continue;
+                NoteWithDuration note = (NoteWithDuration)pntLeft.MelodyPart;
 
                 if (note.IsPause)
+                    continue;
+
+                if (pntLeft.MaxLength <= longestSwap.Length)
                     continue;
 
                 bool valid = false;
                 foreach (MelodyPartPointer pntRight in GetMelodyPartPointers(melodyPartLists))
                 {
+                    if (pntRight.MaxLength <= longestSwap.Length)
+                        continue;
+
                     if (valid)
                     {
-                        if (!(pntLeft.MelodyPart is NoteWithDuration))
-                            continue;
+                        Debug.Assert(pntLeft.MelodyPart is NoteWithDuration);
+                        Debug.Assert(pntLeft != pntRight);
 
                         Swap currentSwap = new Swap()
                         {
@@ -232,7 +266,7 @@ namespace MusicCore
                             pnt1 = pntLeft, pnt2 = pntRight
                         };
 
-                        if (currentSwap.list.Count > 0)
+                        if (currentSwap.Length > 0)
                         {
                             currentSwap.AssertCorrect();
 
@@ -254,8 +288,38 @@ namespace MusicCore
         private static IEnumerable<MelodyPartPointer> GetMelodyPartPointers(List<MelodyPartList> melodyPartLists)
         {
             foreach (var list in melodyPartLists)
-                for (int i = 0; i < list.Count; i++)
-                    yield return new MelodyPartPointer() { part = list, index = i };
+            {
+                int i = 0;
+                while (i < list.Count && !(list[i] is NoteWithDuration))
+                {
+                    i++;
+                }
+
+                if (i >= list.Count)
+                    continue;
+
+                MelodyPartPointer mpp = new MelodyPartPointer(list, i);
+                int lastNote = mpp.lastNoteIndex;
+                yield return mpp;
+
+                for (i++; i < list.Count; i++)
+                {
+                    if (i <= lastNote)
+                        yield return new MelodyPartPointer(list, i, lastNote);
+                    else
+                    {
+                        while (i < list.Count && !(list[i] is NoteWithDuration))
+                            i++;
+
+                        if (i >= list.Count)
+                            break;
+
+                        mpp = new MelodyPartPointer(list, i);
+                        lastNote = mpp.lastNoteIndex;
+                        yield return mpp;
+                    }
+                }
+            }
         }
 
         private static MelodyPartList FindLongestMelodyPartList(MelodyPartPointer pnt1, MelodyPartPointer pnt2)
