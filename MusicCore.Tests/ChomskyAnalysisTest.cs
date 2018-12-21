@@ -7,6 +7,13 @@ namespace MusicCore.Tests
     [TestClass]
     public class ChomskyAnalysisTest
     {
+        [DataRow(@"Resources\Albinoni_Adagio.mid")]
+        [DataTestMethod]
+        public void Albinoni_Adagio(string filename)
+        {
+            Test(filename);
+        }
+
         [DataRow(@"Resources\Bach_invention_1_Cmajor.mid")]
         [DataRow(@"Resources\Bach_invention_4_Dminor.mid")]
         [DataRow(@"Resources\Bach_invention_8_Fmajor.mid")]
@@ -15,7 +22,14 @@ namespace MusicCore.Tests
         [DataTestMethod]
         public void Bach_inventions(string filename)
         {
-            Test(filename, 2);
+            Test(filename);
+        }
+
+        [DataRow(@"Resources\Bach_Air_on_G_String_BWV1068.mid")]
+        [DataTestMethod]
+        public void Bach_Air_on_G_String(string filename)
+        {
+            Test(filename);
         }
 
         [DataRow(@"Resources\Mozart_Symphony40_Allegro.mid")]
@@ -25,7 +39,7 @@ namespace MusicCore.Tests
             Test(filename, 2);
         }
 
-        private void Test(string filename, int take)
+        private void Test(string filename, int take = int.MaxValue)
         {
             var lists = MidiFileReader.Read(filename).Take(take).ToList();
 
