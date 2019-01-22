@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace MusicCore.Tests
@@ -55,6 +56,19 @@ namespace MusicCore.Tests
             ChomskyGrammarAnalysis.PostAnalysis(lists);
             ChomskyGrammarAnalysis.Print(allNodes);
             CheckPostAnalysis(allNodes, lists.Count);
+
+            int totalNotesBefore = copy.Sum(list => list.Count());
+            int totalNotesAfter = allNodes.Sum(list => list.Count(imp => imp is NoteWithDuration));
+            int totalLeafs = allNodes.Sum(list => list.IsLeaf ? 1 : 0);
+            int totalLeafNotes = allNodes.Sum(list => list.IsLeaf ? list.Count : 0);
+
+            Debug.WriteLine(filename);
+            Debug.WriteLine($"Total notes before: {totalNotesBefore}");
+            Debug.WriteLine($"Total notes after: {totalNotesAfter}");
+            Debug.WriteLine($"After/before: {100 * totalNotesAfter / totalNotesBefore}%");
+            Debug.WriteLine($"Total leaf notes: {totalLeafNotes}");
+            Debug.WriteLine($"Leaf notes/before: {100 * totalLeafNotes / totalNotesBefore}%");
+            Debug.WriteLine($"Total leafs: {totalLeafs}");
         }
 
         #region Helper methods

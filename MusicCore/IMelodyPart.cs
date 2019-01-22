@@ -102,7 +102,7 @@ namespace MusicCore
 
         public bool IsIdentical(MelodyPartList node) => this.SequenceEqual(node);
 
-        public bool IsLeaf() => !GetChildren().Any();
+        public bool IsLeaf => !GetChildren().Any();
 
         public IEnumerable<MelodyPartList> GetChildren() =>
             this
