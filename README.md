@@ -7,5 +7,5 @@ Types of repetition:
 - Identical
 - Transposed by octave or two
 - Transposed by number of semitones
-- Within the same scale, but start on different tone
+- Within the same scale, but start on different tone e.g. Albinoni Adagio
 - Within different scales
