@@ -88,7 +88,7 @@ namespace MusicCore
         }
 
         //todo: add int stepsPerOctave;
-        Fraction duration
+        public Fraction duration
         {
             get
             {

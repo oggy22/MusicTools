@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using MusicCore;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace MusicAnalysisWPF
@@ -29,8 +30,26 @@ namespace MusicAnalysisWPF
                 txt.Text += "File loaded.\r\n";
 
                 txt.Text += "Analysing...\r\n";
-                ChomskyGrammarAnalysis.Reduce(lists);
+                var allNodes = ChomskyGrammarAnalysis.Reduce(lists);
                 txt.Text += $"Analysis finished!\r\n";
+
+                txt.Text += "Post-analysing...\r\n";
+                ChomskyGrammarAnalysis.PostAnalysis(lists);
+                txt.Text += $"Post-analysis finished!\r\n";
+
+                List<double> x=new List<double>(), y = new List<double>(), c = new List<double>(), d = new List<double>();
+                foreach (var node in allNodes)
+                {
+                    if (lists.Contains(node))
+                        continue;
+
+                    x.Add(node.RecursiveCount);
+                    y.Add(node.TotalOccurances);
+                    c.Add(node.IsLeaf ? 0.5 : 0.9);
+                    d.Add(50);
+                }
+
+                circles.PlotColor(x.ToArray(), y.ToArray(), c.ToArray());
             }
         }
     }
