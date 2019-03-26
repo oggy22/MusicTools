@@ -29,8 +29,14 @@ namespace MusicAnalysisWPF
                 txt.Text += "File loaded.\r\n";
 
                 txt.Text += "Analysing...\r\n";
-                ChomskyGrammarAnalysis.Reduce(lists);
+                var allNodes = ChomskyGrammarAnalysis.Reduce(lists);
                 txt.Text += $"Analysis finished!\r\n";
+
+                txt.Text += "Post analysis...\r\n";
+                ChomskyGrammarAnalysis.PostAnalysis(lists);
+                txt.Text += "Post analysis finished!\r\n";
+
+                listView.ItemsSource = allNodes;
             }
         }
     }

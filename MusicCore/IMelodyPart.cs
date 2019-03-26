@@ -28,7 +28,7 @@ namespace MusicCore
 
         public IEnumerable<NoteWithDuration> GetNotes()
         {
-            foreach (var part in node)
+            foreach (var part in node.children)
                 foreach (var note in part.GetNotes())
                     yield return note + offset;
         }
@@ -39,10 +39,16 @@ namespace MusicCore
         }
     }
 
-    public class MelodyPartList : List<IMelodyPart>
+    public class MelodyPartList
     {
+        internal List<IMelodyPart> children = new List<IMelodyPart>();
+        public int Count => children.Count;
+        public IMelodyPart this[int index] => children[index];
         private static int idVoice = 0, idMelody = 0;
         public readonly int id;
+        public void Add(IMelodyPart imp) => children.Add(imp);
+        public void RemoveRange(int i, int count) => children.RemoveRange(i, count);
+        public void Insert(int i, IMelodyPart imp) => children.Insert(i, imp);
 
         public enum Type { Voice, Melody, Copy }
         public Type type;
@@ -66,15 +72,15 @@ namespace MusicCore
         {
             this.type = Type.Copy;
 
-            foreach (var nwd in mpl)
-                Add(nwd);
+            foreach (var nwd in mpl.children)
+                children.Add(nwd);
         }
 
         public override string ToString()
         {
             string st =  $"{type}/{id}: Notes = {this.GetNotes().Count()}; Total occurances={TotalOccurances}; Voices={TotalVoices}; ";
 
-            foreach (var impl in this)
+            foreach (var impl in this.children)
             {
                 if (impl is NoteWithDuration nwd)
                     st += $"{nwd},";
@@ -93,19 +99,19 @@ namespace MusicCore
             get
             {
                 Fraction sum = 0;
-                foreach (var el in this)
+                foreach (var el in this.children)
                     sum += el.duration;
 
                 return sum;
             }
         }
 
-        public bool IsIdentical(MelodyPartList node) => this.SequenceEqual(node);
+        public bool IsIdentical(MelodyPartList node) => this.children.SequenceEqual(node.children);
 
         public bool IsLeaf => !GetChildren().Any();
 
         public IEnumerable<MelodyPartList> GetChildren() =>
-            this
+            this.children
             .OfType<MelodyPart>()
             .Select(imp => imp.node);
 
@@ -113,7 +119,7 @@ namespace MusicCore
 
         public IEnumerable<NoteWithDuration> GetNotes()
         {
-            foreach (var mp in this)
+            foreach (var mp in this.children)
                 foreach (var note in mp.GetNotes())
                     yield return note;
         }
@@ -142,7 +148,7 @@ namespace MusicCore
 
         internal void PlayRecursive(int offset = 0)
         {
-            foreach (IMelodyPart melodyPart in this)
+            foreach (IMelodyPart melodyPart in this.children)
             {
                 if (melodyPart is NoteWithDuration note)
                 {

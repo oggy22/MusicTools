@@ -94,7 +94,7 @@ namespace MusicComposer
             {
                 var list = MidiFileReader.Read(args[1]);
                 int previousNote = 0;
-                foreach (NoteWithDuration note in list[0])
+                foreach (NoteWithDuration note in list[0].GetNotes())
                 {
                     if (previousNote != 0)
                         midiOut.Send(MidiMessage.StopNote(previousNote, 100, 1).RawData);

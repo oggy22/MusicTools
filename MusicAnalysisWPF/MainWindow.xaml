@@ -10,9 +10,26 @@
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Name="txt"  Grid.Row="0" TextWrapping="Wrap"/>
-        <Button Name="btnOpen" Click="btnOpen_Click" Grid.Row="1">
+        <TabControl Grid.Row="0">
+            <TabItem Header="Output">
+                <TextBlock Name="txt"  Grid.Row="0" TextWrapping="Wrap"/>
+            </TabItem>
+            <TabItem Header="List">
+                <ListView Name="listView"/>
+            </TabItem>
+            <TabItem Header="Graph">
+
+            </TabItem>
+            <TabItem Header="DAG">
+
+            </TabItem>
+        </TabControl>
+        <TextBlock Grid.Row="1" FontSize="24">
+            (Here will be melody part represenation)
+        </TextBlock >
+        <Button Name="btnOpen" Click="btnOpen_Click" Grid.Row="2">
             Open File
         </Button>
     </Grid>

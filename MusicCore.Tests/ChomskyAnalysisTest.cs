@@ -57,8 +57,8 @@ namespace MusicCore.Tests
             ChomskyGrammarAnalysis.Print(allNodes);
             CheckPostAnalysis(allNodes, lists.Count);
 
-            int totalNotesBefore = copy.Sum(list => list.Count());
-            int totalNotesAfter = allNodes.Sum(list => list.Count(imp => imp is NoteWithDuration));
+            int totalNotesBefore = copy.Sum(list => list.Count);
+            int totalNotesAfter = allNodes.Sum(list => list.children.Count(imp => imp is NoteWithDuration));
             int totalLeafs = allNodes.Sum(list => list.IsLeaf ? 1 : 0);
             int totalLeafNotes = allNodes.Sum(list => list.IsLeaf ? list.Count : 0);
 
