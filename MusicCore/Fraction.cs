@@ -80,6 +80,11 @@ namespace MusicCore
             return fract.p;
         }
 
+        static public implicit operator double(Fraction fract)
+        {
+            return ((double)fract.p) / fract.q;
+        }
+
         static public implicit operator Fraction(int n)
         {
             return new Fraction(n, 1);

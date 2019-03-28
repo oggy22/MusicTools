@@ -8,29 +8,42 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="5" />
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TabControl Grid.Row="0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <TabControl Grid.Row="0" Grid.ColumnSpan="3">
             <TabItem Header="Output">
                 <TextBlock Name="txt"  Grid.Row="0" TextWrapping="Wrap"/>
             </TabItem>
             <TabItem Header="List">
-                <ListView Name="listView"/>
+                <ListView Name="listView" SelectionMode="Single" SelectionChanged="ListView_SelectionChanged"/>
             </TabItem>
-            <TabItem Header="Graph">
+            <TabItem Header="Chart">
 
             </TabItem>
             <TabItem Header="DAG">
 
             </TabItem>
         </TabControl>
-        <TextBlock Grid.Row="1" FontSize="24">
-            (Here will be melody part represenation)
-        </TextBlock >
-        <Button Name="btnOpen" Click="btnOpen_Click" Grid.Row="2">
+        <GridSplitter Grid.Row="1" Grid.ColumnSpan="3" Height="5" HorizontalAlignment="Stretch" />
+        <local:MusicalNodeWPF Grid.Row="2" Grid.ColumnSpan="3" x:Name="musicalNodeWPF">
+            
+        </local:MusicalNodeWPF>
+        <Button Name="btnOpen" Click="BtnOpen_Click" Grid.Row="3" Grid.Column="0">
             Open File
+        </Button>
+        <Button Name="btnPlay" Click="BtnPlay_Click"  Grid.Row="3" Grid.Column="1">
+            Play/Pause
+        </Button>
+        <Button Name="btnStop" Click="BtnStop_Click"  Grid.Row="3" Grid.Column="2">
+            Stop
         </Button>
     </Grid>
 </Window>

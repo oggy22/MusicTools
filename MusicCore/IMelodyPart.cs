@@ -24,7 +24,17 @@ namespace MusicCore
             this.node = node;
         }
 
-        public Fraction duration => throw new System.NotImplementedException();
+        public Fraction duration
+        {
+            get
+            {
+                Fraction sum = 0;
+                foreach (var part in node.children)
+                    sum += part.duration;
+
+                return sum;
+            }
+        }
 
         public IEnumerable<NoteWithDuration> GetNotes()
         {
