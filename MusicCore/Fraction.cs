@@ -6,7 +6,6 @@ namespace MusicCore
     public struct Fraction
     {
         static public readonly Fraction ZERO = new Fraction(0, 1);
-
         //Invariant: p and q are always co-prime
         public readonly int p, q;
 
@@ -30,6 +29,15 @@ namespace MusicCore
         {
             int gcd = GCD(a, b);
             return (a / gcd) * b;
+        }
+
+        public static Fraction Min(Fraction a, Fraction b)
+        {
+            // a = a.p / a.q, b = b.p / b.q;
+            if (((long)a.p) * b.q < ((long)b.p * a.q))
+                return a;
+            else
+                return b;
         }
 
         public static Fraction operator+(Fraction f, int n)
@@ -76,8 +84,7 @@ namespace MusicCore
 
         static public implicit operator int(Fraction fract)
         {
-            Debug.Assert(fract.q == 1);
-            return fract.p;
+            return fract.p / fract.q;
         }
 
         static public implicit operator double(Fraction fract)

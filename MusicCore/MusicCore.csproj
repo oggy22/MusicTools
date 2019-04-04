@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MusicCore</RootNamespace>
     <AssemblyName>MusicCore</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChomskyGrammarAnalysis.cs" />
+    <Compile Include="Composition.cs" />
     <Compile Include="Fraction.cs" />
     <Compile Include="IMelodyPart.cs" />
     <Compile Include="Instruments\Instrument.cs" />

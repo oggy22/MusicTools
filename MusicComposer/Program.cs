@@ -92,18 +92,15 @@ namespace MusicComposer
 
             if (args.Length == 2 && args[0] == "midi")
             {
-                var list = MidiFileReader.Read(args[1]);
-                int previousNote = 0;
-                foreach (NoteWithDuration note in list[0].GetNotes())
-                {
-                    if (previousNote != 0)
-                        midiOut.Send(MidiMessage.StopNote(previousNote, 100, 1).RawData);
+                var composition = MidiFileReader.Read(args[1]);
 
-                    previousNote = note.note;
-                    midiOut.Send(MidiMessage.StartNote(note.note, 100, 1).RawData);
-                    var fract = note.Duration;
-                    Thread.Sleep(15 * 1000 * fract.p / fract.q / 60);
-                }
+                composition.PlayBack(
+                    note =>
+                    {
+                        midiOut.Send(MidiMessage.StartNote(note, 100, 1).RawData);
+                        midiOut.Send(MidiMessage.StartNote(note+4, 100, 1).RawData);
+                    },
+                    note => midiOut.Send(MidiMessage.StopNote(note, 100, 1).RawData));
 
                 return;
             }

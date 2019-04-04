@@ -1,6 +1,6 @@
 ﻿using Microsoft.Win32;
 using MusicCore;
-using System.Collections.Generic;
+using NAudio.Midi;
 using System.Windows;
 
 namespace MusicAnalysisWPF
@@ -27,22 +27,24 @@ namespace MusicAnalysisWPF
 
                 //todo: using Dispatcher.Invoke doesn't work
                 Dispatcher.Invoke(() => { txt.Text += $"File {filename} loading...\r\n"; });
-                lists = MidiFileReader.Read(filename);
+                composition = MidiFileReader.Read(filename);
                 Dispatcher.Invoke(() => { txt.Text += "File loaded.\r\n"; this.UpdateLayout(); });
 
                 txt.Text += "Analysing...\r\n";
-                var allNodes = ChomskyGrammarAnalysis.Reduce(lists);
+                var allNodes = ChomskyGrammarAnalysis.Reduce(composition.GetVoices());
                 txt.Text += $"Analysis finished!\r\n";
 
                 txt.Text += "Post analysis...\r\n";
-                ChomskyGrammarAnalysis.PostAnalysis(lists);
+                ChomskyGrammarAnalysis.PostAnalysis(composition.GetVoices());
                 txt.Text += "Post analysis finished!\r\n";
+
+                this.Title = $"{filename} - Music Analysis";
 
                 listView.ItemsSource = allNodes;
             }
         }
 
-        List<MelodyPartList> lists;
+        Composition composition;
 
         private void ListView_Selected(object sender, RoutedEventArgs e)
         {
@@ -58,9 +60,12 @@ namespace MusicAnalysisWPF
             musicalNodeWPF.Present(mpl);
         }
 
+        static MidiOut midiOut = new MidiOut(0);
+        
         private void BtnPlay_Click(object sender, RoutedEventArgs e)
         {
-            //todo: play lists
+            composition.PlayBack(midiOut);
+            //todo: make it asynchronous
         }
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)

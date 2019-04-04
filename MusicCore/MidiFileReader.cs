@@ -5,10 +5,10 @@ namespace MusicCore
 {
     public static class MidiFileReader
     {
-        public static List<MelodyPartList> Read(string filename)
+        public static Composition Read(string filename)
         {
             MidiFile midi = new MidiFile(filename, true);
-            List<MelodyPartList> ret = new List<MelodyPartList>();
+            Composition composition = new Composition();
 
             for (int track = 0; track < midi.Tracks; track++)
             {
@@ -37,10 +37,10 @@ namespace MusicCore
                 }
 
                 if (list.Count > 0)
-                    ret.Add(list);
+                    composition.AddVoice(list);
             }
 
-            return ret;
+            return composition;
         }
     }
 }

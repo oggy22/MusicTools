@@ -20,5 +20,14 @@ namespace MusicCore.Tests
             Assert.AreEqual(1, Fraction.GCD(17, 25));
             Assert.AreEqual(2, Fraction.GCD(4, 6));
         }
+
+        [TestMethod]
+        public void TestMin()
+        {
+            Assert.AreEqual(new Fraction(3, 4), Fraction.Min(new Fraction(3, 4), new Fraction(4, 5)));
+            Fraction.Min(0, 1);
+            Assert.AreEqual<Fraction>(0, Fraction.Min(0, 1));
+            Assert.AreEqual<Fraction>(-2, Fraction.Min(-1, -2));
+        }
     }
 }

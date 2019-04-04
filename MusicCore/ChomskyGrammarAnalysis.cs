@@ -99,7 +99,7 @@ namespace MusicCore
         /// Perfomrs Chomsky analysis and reduces the list, similar to compression.
         /// </summary>
         /// <param name="melodyPartNodes">All nodes including input and all produced nodes</param>
-        public static List<MelodyPartList> Reduce(List<MelodyPartList> melodyPartNodes)
+        public static List<MelodyPartList> Reduce(IEnumerable<MelodyPartList> melodyPartNodes)
         {
             List<MelodyPartList> allNodes = new List<MelodyPartList>(melodyPartNodes);
 
@@ -165,7 +165,7 @@ namespace MusicCore
             Debug.WriteLine("");
         }
 
-        public static void PostAnalysis(List<MelodyPartList> melodyPartLists)
+        public static void PostAnalysis(IEnumerable<MelodyPartList> melodyPartLists)
         {
             foreach (MelodyPartList mpl in melodyPartLists)
             {
@@ -235,7 +235,7 @@ namespace MusicCore
             }
         }
 
-        internal static Swap FindLongestSwap(List<MelodyPartList> melodyPartLists)
+        internal static Swap FindLongestSwap(IEnumerable<MelodyPartList> melodyPartLists)
         {
             Swap longestSwap = new Swap() { list = new MelodyPartList(MelodyPartList.Type.Melody) };
 
@@ -285,7 +285,7 @@ namespace MusicCore
             return longestSwap;
         }
 
-        private static IEnumerable<MelodyPartPointer> GetMelodyPartPointers(List<MelodyPartList> melodyPartLists)
+        private static IEnumerable<MelodyPartPointer> GetMelodyPartPointers(IEnumerable<MelodyPartList> melodyPartLists)
         {
             foreach (var list in melodyPartLists)
             {

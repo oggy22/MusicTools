@@ -42,7 +42,7 @@ namespace MusicCore.Tests
 
         private void Test(string filename, int take = int.MaxValue)
         {
-            var lists = MidiFileReader.Read(filename).Take(take).ToList();
+            var lists = MidiFileReader.Read(filename).GetVoices().Take(take).ToList();
 
             // Save copy
             var copy = FlatCopy(lists);
