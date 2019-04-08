@@ -144,19 +144,11 @@ namespace MusicCore
         }
     }
 
-    public class tone12
+    public struct tone12
     {
         public override int GetHashCode()
         {
             return tone;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is tone12)
-                return (obj as tone12).tone == tone;
-
-            return false;
         }
 
         const int TWELVE = 12;

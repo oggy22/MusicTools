@@ -1,4 +1,5 @@
-﻿using NAudio.Midi;
+﻿using System.Linq;
+using NAudio.Midi;
 using System.Collections.Generic;
 
 namespace MusicCore
@@ -22,6 +23,30 @@ namespace MusicCore
             SortBy sortBy = SortBy.None)
         {
             //todo: perform query
+        }
+
+        public static int NoteTo12Tone(int x)
+        {
+            if (x > 0)
+                return x % 12;
+
+            return 0;
+        }
+
+        public static List<NoteWithDuration> ChromaticToDiatonic(List<int> notes)
+        {
+            notes.Distinct().ToList().Sort();
+
+            HashSet<int> hash;
+
+            return null;
+        }
+
+        public static List<int> DiatonicToChromatic(List<NoteWithDuration> notes)
+        {
+            HashSet<int> hash;
+
+            return null;
         }
     }
 }

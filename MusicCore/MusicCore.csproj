@@ -68,7 +68,6 @@
     <Compile Include="Rhythm\RhythmSectionInverse.cs" />
     <Compile Include="Rhythm\RhytmPattern.cs" />
     <Compile Include="StaticAndExtensionMethods.cs" />
-    <Compile Include="TimeLine.cs" />
     <Compile Include="Tone12.cs" />
     <Compile Include="TonesAndIntervals.cs" />
     <Compile Include="TwelveToneSet.cs" />

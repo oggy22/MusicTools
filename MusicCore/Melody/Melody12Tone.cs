@@ -25,10 +25,10 @@ namespace MusicCore
 
         public override Fraction Duration => melodyBase.Duration;
 
-        public Melody12Tone(MelodyBase melodyBase, MusicalModes mode, int key = 0, int tempo = 60)
+        public Melody12Tone(MelodyBase melodyBase, TwelveToneSet toneset, int key = 0, int tempo = 60)
         {
             this.melodyBase = melodyBase;
-            toneset = new TwelveToneSet(mode);
+            this.toneset = toneset;
             this.key = key;
             this.tempo = tempo;
         }

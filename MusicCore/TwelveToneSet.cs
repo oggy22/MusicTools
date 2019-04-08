@@ -89,15 +89,6 @@ namespace MusicCore
             return A * GetLowestCommonHarmonic() - B * GetHighestCommonSubHarmonic();
         }
 
-        public TwelveToneSet ToTwelveToneSet()
-        {
-            TwelveToneSet set = new TwelveToneSet();
-            foreach (var tone in this)
-                set.Add(tone % 12);
-
-            return set;
-        }
-
         public IEnumerator<Tone> GetEnumerator()
         {
             return new Iterator(this);
@@ -162,7 +153,7 @@ namespace MusicCore
         public int NumberOfNotes { get; }
     }
 
-    public class TwelveToneSet : IEnumerable<tone12>//, ConfiningSet
+    public struct TwelveToneSet : IEnumerable<tone12>
     {
         #region Constants
         public const int TWELVE = 12;
@@ -171,48 +162,53 @@ namespace MusicCore
         private static readonly char FLAT = '♭';
 
         static readonly Dictionary<char, int> KEYS = new Dictionary<char, int>
-            {
-                {'C', 0}, {'D', 2}, {'E', 4}, {'F', 5}, {'G', 7}, {'A', 9}, {'B', 11}, {'H', 11}
-            };
+        {
+            { 'C', 0}, {'D', 2}, {'E', 4}, {'F', 5}, {'G', 7}, {'A', 9}, {'B', 11}, {'H', 11}
+        };
 
-        static public TwelveToneSet majorScale = new TwelveToneSet("CDEFGAH");
-        static public TwelveToneSet minorScale = new TwelveToneSet("CDE♭FGA♭B♭");
-        static public TwelveToneSet minorHarmonicScale = new TwelveToneSet("CDE♭FGA♭B");
-        static public TwelveToneSet minorMelodicScale = new TwelveToneSet("CDE♭FGAB");
-
-        static public TwelveToneSet majorTriad = new TwelveToneSet("CEG");
-        static public TwelveToneSet minorTriad = new TwelveToneSet("CE♭G");
-        static public TwelveToneSet major7 = new TwelveToneSet("CEGB♭");
-        static public TwelveToneSet minor7 = new TwelveToneSet("CE♭GB♭");
-        static public TwelveToneSet augmented = new TwelveToneSet("CEG#");
-        static public TwelveToneSet halfDiminished = new TwelveToneSet("CDFG#");
-        static public TwelveToneSet fullDiminished = new TwelveToneSet("CE♭F#A");
+        static public readonly TwelveToneSet majorScale = new TwelveToneSet("CDEFGAH");
+        static public readonly TwelveToneSet minorScale = new TwelveToneSet("CDE♭FGA♭B♭");
+        static public readonly TwelveToneSet minorHarmonicScale = new TwelveToneSet("CDE♭FGA♭B");
+        static public readonly TwelveToneSet minorMelodicScale = new TwelveToneSet("CDE♭FGAB");
+        static public readonly TwelveToneSet majorTriad = new TwelveToneSet("CEG");
+        static public readonly TwelveToneSet minorTriad = new TwelveToneSet("CE♭G");
+        static public readonly TwelveToneSet major7 = new TwelveToneSet("CEGB♭");
+        static public readonly TwelveToneSet minor7 = new TwelveToneSet("CE♭GB♭");
+        static public readonly TwelveToneSet augmented = new TwelveToneSet("CEG#");
+        static public readonly TwelveToneSet halfDiminished = new TwelveToneSet("CDFG#");
+        static public readonly TwelveToneSet fullDiminished = new TwelveToneSet("CE♭F#A");
 
         static public TwelveToneSet chromatic = new TwelveToneSet(MusicalModes.Chromatic);
         #endregion
 
-        private bool[] tones;
+        private readonly short tones;
 
         #region Properties
         public bool IsRooted { get { return this[0]; } }
 
-        public int Count { get { return tones.Count(f => f); } }
-
-        public bool IsConst
+        public int Count
         {
-            get; private set;
+            get
+            {
+                int tones_copy = tones;
+                int count = 0;
+                while (tones_copy != 0)
+                {
+                    if ((tones_copy & 1) == 1)
+                        count++;
+
+                    tones_copy = tones_copy >> 1;
+                }
+
+                return count;
+            }
         }
 
         public bool this[int pos]
         {
             get
             {
-                return tones[pos];
-            }
-            set
-            {
-                Debug.Assert(!IsConst);
-                tones[pos] = value;
+                return ((1 << pos) & tones) != 0;
             }
         }
 
@@ -247,24 +243,38 @@ namespace MusicCore
             if (tones.Length > TWELVE)
                 Debug.Fail($"Parameter tones.Length = {tones.Length} must not be larger than {TWELVE}");
 
-            tones = new bool[TWELVE];
+            this.tones = (short)(0);
+            for (int i = 0; i < tones.Length; i++) ;
+            //todo:
+        }
+
+        public TwelveToneSet(int[] tones)
+        {
+            if (tones.Length > TWELVE)
+                Debug.Fail($"Parameter tones.Length = {tones.Length} must not be larger than {TWELVE}");
+
+            this.tones = (short)(0);
             for (int i = 0; i < tones.Length; i++)
-                this[i] = tones[i];
+            {
+                int pos = tones[i];
+                Debug.Assert(0 <= pos && pos < TWELVE);
+                this.tones = BitOn(this.tones, pos);
+            }
         }
 
         public TwelveToneSet(MusicalModes mode) : this(majorScale)
         {
             if (mode == MusicalModes.Chromatic)
             {
-                for (int i = 0; i < TWELVE; i++)
-                    this[i] = true;
+                tones = 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 + 256 + 512 + 1024 + 2048;
+
                 return;
             }
 
             if (mode >= MusicalModes.Dorian && mode <= MusicalModes.Locrian)
             {
                 int shift = FindNth((int)mode - (int)MusicalModes.Ionian);
-                this.ShiftLeft(shift);
+                this = ShiftLeft(shift);
                 return;
             }
 
@@ -277,13 +287,13 @@ namespace MusicCore
 
             if (mode == MusicalModes.MinorMelodic)
             {
+                MakeSharp(4);
                 MakeSharp(5);
-                MakeSharp(6);
             }
 
             if (mode == MusicalModes.MinorHarmonic)
             {
-                MakeSharp(6);
+                MakeSharp(5);
             }
         }
 
@@ -313,36 +323,15 @@ namespace MusicCore
             return steps == 1 ? k : PreviousInScale(k, steps - 1);
         }
 
-        public TwelveToneSet()
-        {
-            tones = new bool[TWELVE];
-        }
-
-        public TwelveToneSet(int[] tones)
-        {
-            Debug.Assert(tones[0] >= 0);
-            Debug.Assert(tones[tones.Length-1] < TWELVE);
-            this.tones = new bool[TWELVE];
-            this.tones[tones[0]] = true;
-            for (int i=1; i<tones.Length; i++)
-            {
-                Debug.Assert(tones[i] > tones[i - 1]);
-                this.tones[tones[i]] = true;
-            }
-            IsConst = true;
-        }
-
         public TwelveToneSet(TwelveToneSet other)
         {
-            tones = new bool[TWELVE];
-            for (int i = 0; i < TWELVE; i++)
-                tones[i] = other.tones[i];
+            this.tones = other.tones;
         }
 
         public TwelveToneSet(string st)
         {
-            tones = new bool[TWELVE];
             int pos;
+            tones = 0;
             for (int i = 0; i < st.Length; i++)
             {
                 pos = KEYS[st[i]];
@@ -356,16 +345,12 @@ namespace MusicCore
                     i++;
                 }
 
-                this[pos] = true;
+                tones |= (short)(1 << pos);
             }
-            IsConst = true;
         }
 
-        public TwelveToneSet(Random rand, int ntones, TwelveToneSet scale = null)
+        public TwelveToneSet(Random rand, int ntones, TwelveToneSet scale)
         {
-            if (scale == null)
-                scale = chromatic;
-
             Debug.Assert(ntones <= scale.Count);
             tone12 pos = 0;
 
@@ -377,22 +362,21 @@ namespace MusicCore
             int times = rand.Next(scale.Count);
             pos = scale.Next(pos, times);
 
-            tones = new bool[TWELVE];
-            this[pos] = true;
+            tones = 0;
+            tones &= (short)(1 << pos);
             for (int i=1; i<ntones; i++)
             {
                 pos = scale.Next(pos, 2);
-                this[pos] = true;
+                tones &= (short)(1 << pos);
             }
 
             Debug.Assert(ntones == this.Count);
-            IsConst = true;
         }
 
         public TwelveToneSet(Random rand, int ntones, bool inScale=true, bool buildOfThirds=false)
         {
             //TODO: Test it
-            tones = new bool[TWELVE];
+            tones = 0;
             for (int i = 0; i<ntones; i++)
             {
                 again:
@@ -402,10 +386,10 @@ namespace MusicCore
                     pos = rand.Next(TWELVE);
                 }
                 while (this[pos]);
-                this[pos] = true;
+                tones &= (short)(1 << pos);
                 if (inScale && !CoveredByAnySimilar(majorScale))
                 {
-                    this[pos] = false;
+                    tones &= (short)(1 << pos);
                     goto again;
                 }
 
@@ -415,41 +399,58 @@ namespace MusicCore
                 }
             }
         }
+
+        public TwelveToneSet(short tones)
+        {
+            this.tones = tones;
+        }
         #endregion
 
         #region Operations
-        public void Add(int k)
+        static bool IsBitOn(short bitmap, int pos)
         {
-            Debug.Assert(!IsConst);
-            tones[k] = true;
+            return (bitmap & (1 << pos)) != 0;
         }
 
-        public void MakeSharp(int k)
+        static public short BitOn(short bitmap, int pos)
+        {
+            Debug.Assert(0 <= pos && pos < TWELVE);
+            bitmap |= ((short)(1 << pos));
+            return bitmap;
+        }
+
+        static public short BitOff(short bitmap, int pos)
+        {
+            Debug.Assert(0 <= pos && pos < TWELVE);
+            bitmap &= ((short)(1 << pos));
+            return bitmap;
+        }
+
+        public TwelveToneSet MakeSharp(int k)
         {
             tone12 n = FindNth(k);
-            this[n] = false;
+            short copy = tones;
+            copy = BitOff(copy, n);
             n++;
             Debug.Assert(this[n] == false);
-            this[n] = true;
+            copy = BitOn(copy, n);
+
+            return new TwelveToneSet(copy);
         }
 
-        public void MakeFlat(int k)
+        public TwelveToneSet MakeFlat(int k)
         {
+            short copy = tones;
+
             int n = FindNth(k);
-            this[n] = false;
+            Debug.Assert(IsBitOn(copy, n));
+            copy = BitOff(copy, n);
             n--;
-            Debug.Assert(this[n] == false);
-            this[n] = true;
+            Debug.Assert(!IsBitOn(copy, n));
+            copy = BitOn(copy, n);
+            return new TwelveToneSet(copy);
         }
         #endregion
-
-        public TwelveToneSet MakeThirdChord(int startPos, int count)
-        {
-            bool[] tones = new bool[TWELVE];
-            Debug.Assert(this[startPos]);
-            this[startPos] = true;
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// Returns the next note circularly
@@ -497,31 +498,18 @@ namespace MusicCore
 
             foreach (tone12 t in this)
             {
-                if (tones[t + 7])
-                    if (tones[t + 3] ^ tones[t + 4])
+                if (IsBitOn(tones, t + 7))
+                    if (IsBitOn(tones, t + 3) ^ IsBitOn(tones, t + 4))
                         roots.Add(t);
             }
 
             if (roots.Count == 1)
                 return roots.Single();
 
-            return null;
+            throw new Exception("There is no root");
         }
 
         #region Equals, Similar, CoveredBy
-        public override bool Equals(object obj)
-        {
-            if (obj is TwelveToneSet)
-                return Equals(obj as TwelveToneSet);
-
-            return base.Equals(obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return tones.Aggregate(0, (c, b) => (c>>1) + (b ? 1 : 0));
-        }
-
         public bool Equals(TwelveToneSet other)
         {
             for (int i = 0; i < TWELVE; i++)
@@ -543,7 +531,7 @@ namespace MusicCore
 
             for (int i=1; i<TWELVE; i++)
             {
-                copy.ShiftRight(1);
+                copy = copy.ShiftRight(1);
                 if (copy.Equals(other))
                     return true;
             }
@@ -569,7 +557,7 @@ namespace MusicCore
 
             for (int i = 1; i < TWELVE; i++)
             {
-                copy.ShiftRight(1);
+                copy = copy.ShiftRight(1);
                 if (copy.CoveredBy(other))
                     return true;
             }
@@ -581,26 +569,22 @@ namespace MusicCore
         #region Union and Intersection
         static TwelveToneSet Union(TwelveToneSet set1, TwelveToneSet set2)
         {
-            TwelveToneSet set = new TwelveToneSet();
-            for (int i = 0; i < TWELVE; i++)
-                set[i] = set1[i] || set2[i];
-            return set;
+            return new TwelveToneSet((short)(set1.tones | set2.tones));
         }
 
         static TwelveToneSet Intersection(TwelveToneSet set1, TwelveToneSet set2)
         {
-            TwelveToneSet set = new TwelveToneSet();
-            for (int i = 0; i < TWELVE; i++)
-                set[i] = set1[i] && set2[i];
-            return set;
+            return new TwelveToneSet((short)(set1.tones & set2.tones));
+        }
+
+        static TwelveToneSet Negative(TwelveToneSet set)
+        {
+            return new TwelveToneSet((short)(chromatic.tones - set.tones));
         }
 
         static TwelveToneSet Minus(TwelveToneSet set1, TwelveToneSet set2)
         {
-            TwelveToneSet set = new TwelveToneSet();
-            for (int i = 0; i < TWELVE; i++)
-                set[i] = set1[i] && !set2[i];
-            return set;
+            return new TwelveToneSet((short)(set1.tones & (Negative(set2).tones)));
         }
         #endregion
 
@@ -630,15 +614,8 @@ namespace MusicCore
         /// <returns>Greater count minus the number of common tones</returns>
         public int DistanceCommonTones(TwelveToneSet other)
         {
-            int max = Math.Max(this.Count, other.Count);
-            int count = 0;
-            for (int i=0; i<TWELVE; i++)
-            {
-                if (tones[i] && other.tones[i])
-                    count++;
-            }
-
-            return max - count;
+            TwelveToneSet common = TwelveToneSet.Intersection(this, other);
+            return Math.Max(this.Count, other.Count) - common.Count;
         }
 
         /// <summary>
@@ -667,6 +644,7 @@ namespace MusicCore
 
         /// <summary>
         /// E.g:
+        /// Any note -> 0
         /// C-E-G -> 4
         /// A-C-E -> 4
         /// C-E-G-H -> 5
@@ -680,13 +658,13 @@ namespace MusicCore
             bool[] fifths = new bool[TWELVE];
             for (int i = 0; i < TWELVE; i += 2)
             {
-                fifths[i] = tones[i];
-                fifths[i + 1] = tones[(i+1 + TWELVE / 2) % TWELVE];
+                fifths[i] = IsBitOn(tones, i);
+                fifths[i + 1] = IsBitOn(tones, (i+1 + TWELVE / 2) % TWELVE);
             }
 
             int countStart = fifths.TakeWhile(b => false).Count();
             int count = 0, maxCount = countStart;
-            for (int i = countStart+1; i<TWELVE; i++)
+            for (int i = countStart + 1; i < TWELVE; i++)
             {
                 if (!fifths[i])
                 {
@@ -710,9 +688,9 @@ namespace MusicCore
         {
             int count = 0;
 
-            for (int i=0; i<TWELVE; i++)
+            for (int i = 0; i < TWELVE; i++)
             {
-                if (tones[i] && !majorScale[i])
+                if (IsBitOn(tones, i) && !majorScale[i])
                     count++;
             }
 
@@ -722,30 +700,18 @@ namespace MusicCore
         #region Modifiers
         public TwelveToneSet ShiftRight(int count)
         {
-            Debug.Assert(!IsConst);
             Debug.Assert(count >= 0 && count < TWELVE);
-            bool[] tones = new bool[TWELVE];
-            for (int i = count; i < TWELVE; i++)
-                tones[i] = this.tones[i - count];
-            for (int i = 0; i < count; i++)
-                tones[i] = this.tones[i + TWELVE - count];
-            this.tones = tones;
-
-            return this;
+            short copy = (short)((tones << count) & chromatic.tones);
+            copy |= (short)(tones >> (TWELVE - count));
+            return new TwelveToneSet(copy);
         }
 
         public TwelveToneSet ShiftLeft(int count)
         {
-            Debug.Assert(!IsConst);
-            Debug.Assert(count >= 0 && count < 12);
-            bool[] tones = new bool[TWELVE];
-            for (int i = count; i < TWELVE; i++)
-                tones[i - count] = this.tones[i];
-            for (int i = TWELVE - count; i < TWELVE; i++)
-                tones[i] = this.tones[i - (TWELVE - count)];
-            this.tones = tones;
+            if (count == 0)
+                return this;
 
-            return this;
+            return ShiftRight(TWELVE - count);
         }
 
         public TwelveToneSet ShiftInScale(int count, TwelveToneSet scale)
@@ -753,9 +719,8 @@ namespace MusicCore
             if (count == 0)
                 return this;
 
-            Debug.Assert(scale.IsConst);
             Debug.Assert(scale.Count >= Count);
-            TwelveToneSet set = new TwelveToneSet();
+            short set = 0;
 
             // Transpose in scale notes first
             TwelveToneSet intersect = Intersection(this, scale);
@@ -763,12 +728,13 @@ namespace MusicCore
             foreach (var x in intersect)
             {
                 mapping[x] = scale.NextInScale(x, count);
-                set[mapping[x]] = true;
+                set = BitOn(set, mapping[x]);
             }
 
             // If each in-scale note was transposed by the same amount, do it for the rest
             TwelveToneSet rest = Minus(this, scale);
-            if (mapping.Select(kpv => new tone12(kpv.Value - kpv.Key)).Distinct().Count() == 1)
+            var nesto = mapping.Select(kpv => new tone12(kpv.Value - kpv.Key));
+            if (nesto.Distinct().Count() == 1)
             {
                 tone12 offset = mapping.First().Value - mapping.First().Key;
 
@@ -776,8 +742,12 @@ namespace MusicCore
                 foreach (var x in rest)
                 {
                     mapping[x] = (x + offset);
-                    set[mapping[x]] = true;
+                    set = BitOn(set, x + offset);
                 }
+
+                TwelveToneSet ttsInScale = new TwelveToneSet(set);
+                Debug.Assert(ttsInScale.Count == this.Count);
+                return ttsInScale;
             }
 
             // If the choice is between in-scale and out-scale, choose in scale
@@ -791,13 +761,14 @@ namespace MusicCore
                     {
                         tone12 tone = scale[list.First()] ? list.First() : list.Last();
                         mapping[x] = tone;
-                        set[tone] = true;
+                        set = BitOn(set, tone);
                     }
                 }
             }
 
-            Debug.Assert(set.Count == this.Count);
-            return set;
+            TwelveToneSet tts = new TwelveToneSet(set);
+            Debug.Assert(tts.Count == this.Count);
+            return tts;
         }
         #endregion
 
@@ -854,7 +825,7 @@ namespace MusicCore
         public IEnumerator<tone12> GetEnumerator()
         {
             for (int i = 0; i < TWELVE; i++)
-                if (tones[i])
+                if (IsBitOn(tones, i))
                     yield return i;
         }
 

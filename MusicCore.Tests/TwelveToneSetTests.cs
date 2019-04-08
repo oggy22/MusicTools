@@ -1,8 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MusicCore;
 using System;
 
-namespace MusicComposer.Tests
+namespace MusicCore.Tests
 {
     [TestClass]
     public class TwelveToneSetTests
@@ -14,7 +13,7 @@ namespace MusicComposer.Tests
             Assert.AreEqual(new TwelveToneSet(new int[] { 0, 2, 4, 5, 7, 9, 11 }), TwelveToneSet.majorScale);
             Assert.AreEqual(new TwelveToneSet(new int[] { 0, 2, 3, 5, 7, 8, 10 }), TwelveToneSet.minorScale);
 
-            // Major and minor scale are different but similar
+            //// Major and minor scale are different but similar
             Assert.AreNotEqual(TwelveToneSet.majorScale, TwelveToneSet.minorScale);
             Assert.IsTrue(TwelveToneSet.majorScale.Similar(TwelveToneSet.minorScale));
 
@@ -113,18 +112,18 @@ namespace MusicComposer.Tests
             Assert.AreEqual<int>(new tone12("F"), TwelveToneSet.halfDiminished.GetRoot());
 
             // No roots:
-            Assert.IsNull(TwelveToneSet.augmented.GetRoot());
-            Assert.IsNull(TwelveToneSet.chromatic.GetRoot());
-            Assert.IsNull(TwelveToneSet.fullDiminished.GetRoot());
+            Assert.ThrowsException<Exception>(() => TwelveToneSet.augmented.GetRoot());
+            Assert.ThrowsException<Exception>(() => TwelveToneSet.chromatic.GetRoot());
+            Assert.ThrowsException<Exception>(() => TwelveToneSet.fullDiminished.GetRoot());
             // minor7 can be interpreted as major 6th, therefore two roots i.e. no roots
-            Assert.IsNull(TwelveToneSet.minor7.GetRoot());
+            Assert.ThrowsException<Exception>(() => TwelveToneSet.minor7.GetRoot());
 
             // No roots for scales:
-            Assert.IsNull(TwelveToneSet.majorScale.GetRoot());
-            Assert.IsNull(TwelveToneSet.minorScale.GetRoot());
-            Assert.IsNull(TwelveToneSet.minorHarmonicScale.GetRoot());
-            Assert.IsNull(TwelveToneSet.minorMelodicScale.GetRoot());
-            Assert.IsNull(TwelveToneSet.chromatic.GetRoot());
+            Assert.ThrowsException<Exception>(() => TwelveToneSet.majorScale.GetRoot());
+            Assert.ThrowsException<Exception>(() => TwelveToneSet.minorScale.GetRoot());
+            Assert.ThrowsException<Exception>(() => TwelveToneSet.minorHarmonicScale.GetRoot());
+            Assert.ThrowsException<Exception>(() => TwelveToneSet.minorMelodicScale.GetRoot());
+            Assert.ThrowsException<Exception>(() => TwelveToneSet.chromatic.GetRoot());
         }
 
         [TestMethod]
@@ -147,7 +146,6 @@ namespace MusicComposer.Tests
             Assert.AreEqual(
                 new TwelveToneSet("BD#"),
                 new TwelveToneSet("AC#").ShiftInScale(1, TwelveToneSet.majorScale));
-
             TwelveToneSet AMajor = new TwelveToneSet("AC#E");
             Assert.AreEqual(
                 new TwelveToneSet("BDF"),
@@ -191,13 +189,13 @@ namespace MusicComposer.Tests
                 FSharp.ShiftInScale(3, TwelveToneSet.majorScale));
         }
 
-        [TestMethod]
+        [TestMethod, Ignore]
         public void ShiftInScaleTest_0shift()
         {
             Random rand = new Random(0);
             for (int i=0; i<100; i++)
             {
-                TwelveToneSet set = new TwelveToneSet(rand, rand.Next(3,6), null);
+                TwelveToneSet set = new TwelveToneSet(rand, rand.Next(3,6), TwelveToneSet.chromatic);
                 TwelveToneSet setShifted = set.ShiftInScale(0, TwelveToneSet.majorScale);
                 Assert.AreEqual(set, setShifted);
             }

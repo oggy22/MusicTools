@@ -44,11 +44,12 @@ namespace MusicComposer
                         continue;
 
                     // Last notes contained by a major scale
-                    TwelveToneSet set = new TwelveToneSet();
-                    set.Add(tone % 12);
+                    short set = 0;
+                    TwelveToneSet.BitOn(set, tone % 12);
                     for (int i = list.Count - 1; i >= list.Count - alightWithLast && i >= 0; i--)
-                        set.Add(list[i] % 12);
-                    if (!CoveredByChordOfInterefest(set))
+                        TwelveToneSet.BitOn(set, list[i] % 12);
+
+                    if (!CoveredByChordOfInterefest(new TwelveToneSet(set)))
                         continue;
 
                     break;

@@ -26,7 +26,7 @@ namespace MusicComposer
         {
             Random rand = new Random();
             TwelveToneSet chord = TwelveToneSet.major7;
-            TwelveToneSet scale = new TwelveToneSet(TwelveToneSet.majorScale);
+            TwelveToneSet scale = TwelveToneSet.majorScale;
             int dist = 0;
             Console.WriteLine($"Chord: {chord.ToString()}");
             int startFrom = chord.First;
