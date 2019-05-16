@@ -39,6 +39,9 @@ namespace MusicCore.Tests
             Assert.AreEqual(4, new TwelveToneSet("CE").MeasureHarmonyByFifths());
             Assert.AreEqual(3, new TwelveToneSet("AC").MeasureHarmonyByFifths());
 
+            // Pentatonics
+            Assert.AreEqual(4, new TwelveToneSet("CDEGA").MeasureHarmonyByFifths());
+
             // Major and minor fifths
             Assert.AreEqual(4, new TwelveToneSet("CEG").MeasureHarmonyByFifths());
             Assert.AreEqual(4, new TwelveToneSet("ACE").MeasureHarmonyByFifths());
@@ -48,7 +51,11 @@ namespace MusicCore.Tests
             Assert.AreEqual(6, new TwelveToneSet("GHDF").MeasureHarmonyByFifths());
             Assert.AreEqual(6, new TwelveToneSet("CEGB♭").MeasureHarmonyByFifths());
 
+            // Major/minor scale
+            Assert.AreEqual(6, new TwelveToneSet("CDEFGAB").MeasureHarmonyByFifths());
+
             // Augmented and diminished
+            Assert.AreEqual(6, new TwelveToneSet("F#AC").MeasureHarmonyByFifths());
             Assert.AreEqual(8, new TwelveToneSet("DF#A#").MeasureHarmonyByFifths());
             Assert.AreEqual(9, new TwelveToneSet("D#F#AC").MeasureHarmonyByFifths());
 

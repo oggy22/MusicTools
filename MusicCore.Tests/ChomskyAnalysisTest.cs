@@ -8,32 +8,32 @@ namespace MusicCore.Tests
     [TestClass]
     public class ChomskyAnalysisTest
     {
-        [DataRow(@"Resources\Albinoni_Adagio.mid")]
+        [DataRow(@"Albinoni_Adagio.mid")]
         [DataTestMethod]
         public void Albinoni_Adagio(string filename)
         {
             Test(filename);
         }
 
-        [DataRow(@"Resources\Bach_invention_1_Cmajor.mid")]
-        [DataRow(@"Resources\Bach_invention_4_Dminor.mid")]
-        [DataRow(@"Resources\Bach_invention_8_Fmajor.mid")]
-        [DataRow(@"Resources\Bach_invention_10_Gmajor.mid")]
-        [DataRow(@"Resources\Bach_invention_13_Aminor.mid")]
+        [DataRow(@"Bach_invention_1_Cmajor.mid")]
+        [DataRow(@"Bach_invention_4_Dminor.mid")]
+        [DataRow(@"Bach_invention_8_Fmajor.mid")]
+        [DataRow(@"Bach_invention_10_Gmajor.mid")]
+        [DataRow(@"Bach_invention_13_Aminor.mid")]
         [DataTestMethod]
         public void Bach_inventions(string filename)
         {
             Test(filename);
         }
 
-        [DataRow(@"Resources\Bach_Air_on_G_String_BWV1068.mid")]
+        [DataRow(@"Bach_Air_on_G_String_BWV1068.mid")]
         [DataTestMethod]
         public void Bach_Air_on_G_String(string filename)
         {
             Test(filename);
         }
 
-        [DataRow(@"Resources\Mozart_Symphony40_Allegro.mid")]
+        [DataRow(@"Mozart_Symphony40_Allegro.mid")]
         [DataTestMethod]
         public void Mozart_Symphony40_Allegro(string filename)
         {

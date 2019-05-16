@@ -37,14 +37,14 @@ namespace MusicCore
         {
             notes.Distinct().ToList().Sort();
 
-            HashSet<int> hash;
+            //HashSet<int> hash;
 
             return null;
         }
 
         public static List<int> DiatonicToChromatic(List<NoteWithDuration> notes)
         {
-            HashSet<int> hash;
+            //HashSet<int> hash;
 
             return null;
         }
