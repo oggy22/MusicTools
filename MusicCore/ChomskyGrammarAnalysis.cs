@@ -124,7 +124,9 @@ namespace MusicCore
                     allNodes.Add(swap.list);
 
                 //Assert that at most one part is whole
-                if (swap.IsWhole1 && swap.IsWhole2)
+                if (swap.IsWhole1 && swap.IsWhole2
+                    && swap.pnt1.part.type != MelodyPartList.Type.Voice
+                    && swap.pnt2.part.type != MelodyPartList.Type.Voice)
                     Debug.Fail(message: "There are two identical parts. One should have referenced another instead of being created.");
 
                 int offset1 = swap.pnt1.MelodyPart.GetNotes().First().note;
@@ -204,6 +206,8 @@ namespace MusicCore
                 pnt2.AssertCorrect();
                 Debug.Assert(pnt1.index + list.Count <= pnt1.part.Count);
                 Debug.Assert(pnt2.index + list.Count <= pnt2.part.Count);
+
+                // Within the same MelodyPart?
                 if (pnt1.part == pnt2.part)
                 {
                     int i = pnt1.index;
@@ -214,22 +218,32 @@ namespace MusicCore
                         Debug.Assert(j + list.Count <= i);
                 }
 
+                Debug.Assert(list[0] is NoteWithDuration);
+
+                // Assert that the list is constructed correctly
                 if (list[0] is NoteWithDuration note0 &&
-                    pnt1.part[pnt1.index+0] is NoteWithDuration p1note0 &&
-                    pnt2.part[pnt2.index+0] is NoteWithDuration p2note0)
+                    pnt1.part[pnt1.index + 0] is NoteWithDuration p1note0 &&
+                    pnt2.part[pnt2.index + 0] is NoteWithDuration p2note0)
+                {
+                    Debug.Assert(!note0.IsPause);
+
                     for (int i = 1; i < list.Count; i++)
                     {
                         if (list[i] is NoteWithDuration note &&
                         pnt1.part[pnt1.index + i] is NoteWithDuration p1note &&
                         pnt2.part[pnt2.index + i] is NoteWithDuration p2note)
                         {
-                            Debug.Assert(-128 < note.note && note.note < 128);
-                            Debug.Assert(p1note.note - p1note0.note == note.note - note0.note);
-                            Debug.Assert(p2note.note - p2note0.note == note.note - note0.note);
+                            if (!note.IsPause)
+                            {
+                                Debug.Assert(-128 < note.note && note.note < 128);
+                                Debug.Assert(p1note.note - p1note0.note == note.note - note0.note);
+                                Debug.Assert(p2note.note - p2note0.note == note.note - note0.note);
+                            }
                         }
                         else
                             Debug.Fail($"{list[i]} {pnt1.part[i]} {pnt2.part[i]} must be notes");
                     }
+                }
                 else
                     Debug.Fail($"{list[0]} {pnt1.part[0]} {pnt2.part[0]} must be notes");
             }
@@ -314,9 +328,12 @@ namespace MusicCore
                         if (i >= list.Count)
                             break;
 
-                        mpp = new MelodyPartPointer(list, i);
-                        lastNote = mpp.lastNoteIndex;
-                        yield return mpp;
+                        if (!((NoteWithDuration)list[i]).IsPause)
+                        {
+                            mpp = new MelodyPartPointer(list, i);
+                            lastNote = mpp.lastNoteIndex;
+                            yield return mpp;
+                        }
                     }
                 }
             }
@@ -337,18 +354,22 @@ namespace MusicCore
                     list.Add(new NoteWithDuration(0, note1.Duration));
                 else
                 {
-                    if (note1.IsPause != pnt1Start.note.IsPause)
+                    if (note1.IsPause != note2.IsPause)
                         break;
 
-                    if (note2.IsPause != pnt2Start.note.IsPause)
-                        break;
+                    if (note1.IsPause)
+                    {
+                        list.Add(new NoteWithDuration(pnt1.MelodyPart.duration));
+                    }
+                    else
+                    {
+                        int newNote1 = note1.note - pnt1Start.note.note;
+                        int newNote2 = note2.note - pnt2Start.note.note;
+                        if (newNote1 != newNote2)
+                            break;
 
-                    int newNote1 = note1.note - pnt1Start.note.note;
-                    int newNote2 = note2.note - pnt2Start.note.note;
-                    if (newNote1 != newNote2)
-                        break;
-
-                    list.Add(new NoteWithDuration(newNote1, pnt1.MelodyPart.duration));
+                        list.Add(new NoteWithDuration(newNote1, pnt1.MelodyPart.duration));
+                    }
                 }
 
                 // Increment pointers

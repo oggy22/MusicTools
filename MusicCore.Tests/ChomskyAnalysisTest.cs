@@ -20,6 +20,7 @@ namespace MusicCore.Tests
         [DataRow(@"Bach_invention_8_Fmajor.mid")]
         [DataRow(@"Bach_invention_10_Gmajor.mid")]
         [DataRow(@"Bach_invention_13_Aminor.mid")]
+        [DataRow(@"Bach_invention_14_Bbmajor.mid")]
         [DataTestMethod]
         public void Bach_inventions(string filename)
         {
@@ -114,7 +115,8 @@ namespace MusicCore.Tests
 
             // At least two elements
             foreach (var list in lists)
-                Assert.IsTrue(list.Count >= 2);
+                if (list.type == MelodyPartList.Type.Melody)
+                    Assert.IsTrue(list.Count >= 2);
         }
         #endregion
     }
