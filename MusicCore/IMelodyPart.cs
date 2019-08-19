@@ -12,9 +12,36 @@ namespace MusicCore
         IEnumerable<NoteWithDuration> GetNotes();
     }
 
+    public class MelodyPartDtoC : MelodyPart
+    {
+        private TwelveToneSet scale;
+
+        public MelodyPartDtoC(int offset, TwelveToneSet scale, MelodyPartList node) //todo: scale should be 3rd arg
+            : base(offset, node)
+        {
+            Debug.Assert(node.IsDiatonic);
+            this.scale = scale;
+        }
+
+        public override IEnumerable<NoteWithDuration> GetNotes()
+        {
+            foreach (var part in node.children)
+                foreach (var note in part.GetNotes())
+                    yield return note.IsPause ?
+                        new NoteWithDuration(note.Duration) :
+                        new NoteWithDuration(
+                        scale.DiatonicToChromatic(note.note) + offset,
+                        note.Duration
+                        );
+        }
+    }
+
+    /// <summary>
+    /// Pointer to MelodyPartList
+    /// </summary>
     public class MelodyPart : IMelodyPart
     {
-        private int offset;
+        protected int offset;
 
         internal MelodyPartList node;
 
@@ -36,7 +63,7 @@ namespace MusicCore
             }
         }
 
-        public IEnumerable<NoteWithDuration> GetNotes()
+        public virtual IEnumerable<NoteWithDuration> GetNotes()
         {
             foreach (var part in node.children)
                 foreach (var note in part.GetNotes())
@@ -51,6 +78,7 @@ namespace MusicCore
 
     public class MelodyPartList
     {
+        public bool IsDiatonic;
         internal List<IMelodyPart> children = new List<IMelodyPart>();
         public int Count => children.Count;
         public IMelodyPart this[int index] => children[index];
@@ -63,9 +91,10 @@ namespace MusicCore
         public enum Type { Voice, Melody, Copy }
         public Type type;
 
-        public MelodyPartList(Type type)
+        public MelodyPartList(Type type, bool isDiatonic = false)
         {
             this.type = type;
+            this.IsDiatonic = isDiatonic;
 
             switch (type)
             {
@@ -88,14 +117,15 @@ namespace MusicCore
 
         public override string ToString()
         {
-            string st =  $"{type}/{id}: Notes = {this.GetNotes().Count()}; Total occurances={TotalOccurances}; Voices={TotalVoices}; ";
-
+            string dorc = IsDiatonic ? "diat" : "chrom";
+            string st =  $"{type}/{id}/{dorc}: Notes = {this.GetNotes().Count()}; Total occurances={TotalOccurances}; Voices={TotalVoices}; ";
+            
             foreach (var impl in this.children)
             {
                 if (impl is NoteWithDuration nwd)
                     st += $"{nwd},";
                 else if (impl is MelodyPart mp)
-                    st += $"{mp.node.type}/{id}{mp.node.id},";
+                    st += $"{mp.node.type}/{mp.node.id},";
                 else
                     Debug.Fail("Unrecognized part");
             }
@@ -147,10 +177,11 @@ namespace MusicCore
                 if (previousNote.HasValue)
                     StaticAndExtensionMethods.midiOut.Send(MidiMessage.StopNote(previousNote.Value + offset, 100, 1).RawData);
 
-                previousNote = note.note;
+                previousNote = note.IsPause ? null : (int?)(note.note);
                 NoteWithDuration noteToPlay = note + offset;
                 Debug.Assert(noteToPlay.IsPause || noteToPlay.note > 10 && noteToPlay.note < 100);
-                StaticAndExtensionMethods.midiOut.Send(MidiMessage.StartNote(noteToPlay.note, 100, 1).RawData);
+                if (!noteToPlay.IsPause)
+                    StaticAndExtensionMethods.midiOut.Send(MidiMessage.StartNote(noteToPlay.note, 100, 1).RawData);
                 var fract = note.Duration;
                 Thread.Sleep(15 * 1000 * fract.p / fract.q / 60);
             }

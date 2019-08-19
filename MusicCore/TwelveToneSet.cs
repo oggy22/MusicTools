@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace MusicCore
 {
@@ -19,138 +18,6 @@ namespace MusicCore
         Locrian = 7,
         MinorHarmonic,
         MinorMelodic
-    }
-
-    public class ToneSet : IEnumerable<Tone>
-    {
-        public ToneSet()
-        {
-            tones = new bool[128];
-        }
-
-        public ToneSet(params int[] array) : this()
-        {
-            foreach (var num in array)
-                tones[num] = true;
-        }
-
-        public ToneSet(Tone tone, TwelveToneSet twelveToneSet) : this()
-        {
-            foreach (var t in twelveToneSet)
-                tones[tone + t] = true;
-        }
-
-        bool[] tones;
-
-        public Tone GetLowestCommonHarmonic()
-        {
-            List<IEnumerator<Tone>> iters = new List<IEnumerator<Tone>>();
-
-            foreach (var iter in this)
-            {
-                iters.Add(iter.GetHarmonicsUp().GetEnumerator());
-                iters.Last().MoveNext();
-            }
-
-            int min;
-            while ((min = iters.Min(it => (int)it.Current)) < iters.Max(it => (int)it.Current))
-            {
-                var iter = iters.Find(it => it.Current == min);
-                bool moved = iter.MoveNext();
-                Debug.Assert(moved);
-            }
-
-            return iters[0].Current;
-        }
-
-        public Tone GetHighestCommonSubHarmonic()
-        {
-            List<IEnumerator<Tone>> iters = new List<IEnumerator<Tone>>();
-
-            foreach (var tone in this)
-            {
-                iters.Add(tone.GetHarmonicsDown().GetEnumerator());
-                iters.Last().MoveNext();
-            }
-
-            int max;
-            while (iters.Min(it => (int)it.Current) < (max=iters.Max(it => (int)it.Current)))
-            {
-                var iter = iters.Find(it => it.Current == max);
-                bool moved = iter.MoveNext();
-                Debug.Assert(moved);
-            }
-
-            return iters[0].Current;
-        }
-
-        public Tone GetDisharmony(int A = 1, int B = 2)
-        {
-            return A * GetLowestCommonHarmonic() - B * GetHighestCommonSubHarmonic();
-        }
-
-        public IEnumerator<Tone> GetEnumerator()
-        {
-            return new Iterator(this);
-        }
-
-        class Iterator : IEnumerator<Tone>
-        {
-            public Iterator(ToneSet toneset)
-            {
-                this.toneset = toneset;
-                Reset();
-            }
-
-            int index;
-            ToneSet toneset;
-
-            public Tone Current => new Tone(index);
-
-            object IEnumerator.Current => new Tone(index);
-
-            public void Dispose()
-            {
-            }
-
-            public bool MoveNext()
-            {
-                do
-                {
-                    index++;
-                    if (index >= toneset.tones.Length)
-                        return false;
-                }
-                while (!toneset.tones[index]);
-                return true;
-            }
-
-            public void Reset()
-            {
-                index = -1;
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return new Iterator(this);
-        }
-
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i<tones.Length; i++)
-                if (tones[i])
-                    sb.Append($"{new Tone(i).ToString()} ");
-
-            return sb.ToString();
-        }
-    }
-
-    public class ConfiningSet
-    {
-        public int Range { get; }
-        public int NumberOfNotes { get; }
     }
 
     public struct TwelveToneSet : IEnumerable<tone12>
@@ -179,6 +46,18 @@ namespace MusicCore
         static public readonly TwelveToneSet fullDiminished = new TwelveToneSet("CE♭F#A");
 
         static public TwelveToneSet chromatic = new TwelveToneSet(MusicalModes.Chromatic);
+        #endregion
+
+        #region Implicit operators
+        public static implicit operator TwelveToneSet(short s)
+        {
+            return new TwelveToneSet(s);
+        }
+
+        public static implicit operator short(TwelveToneSet tts)
+        {
+            return tts.tones;
+        }
         #endregion
 
         private readonly short tones;
@@ -248,17 +127,13 @@ namespace MusicCore
             //todo:
         }
 
-        public TwelveToneSet(int[] tones)
+        public TwelveToneSet(IEnumerable<int> tones)
         {
-            if (tones.Length > TWELVE)
-                Debug.Fail($"Parameter tones.Length = {tones.Length} must not be larger than {TWELVE}");
-
             this.tones = (short)(0);
-            for (int i = 0; i < tones.Length; i++)
+            foreach (int i in tones)
             {
-                int pos = tones[i];
-                Debug.Assert(0 <= pos && pos < TWELVE);
-                this.tones = BitOn(this.tones, pos);
+                tone12 t12 = i;
+                this.tones = BitOn(this.tones, t12);
             }
         }
 
@@ -407,7 +282,7 @@ namespace MusicCore
         #endregion
 
         #region Operations
-        static bool IsBitOn(short bitmap, int pos)
+        static bool IsBitOn(short bitmap, tone12 pos)
         {
             return (bitmap & (1 << pos)) != 0;
         }
@@ -460,7 +335,7 @@ namespace MusicCore
         {
             Debug.Assert(this[pos]);
             for (int i = 0; i < times; i++)
-                while (!this[pos++]);
+                while (!this[++pos]);
 
             return pos;
         }
@@ -469,7 +344,7 @@ namespace MusicCore
         /// Find the n-th scale member
         /// </summary>
         /// <param name="n">Zero-based</param>
-        private tone12 FindNth(int n)
+        public tone12 FindNth(int n)
         {
             Debug.Assert(n >= 0);
             int m = n;
@@ -478,6 +353,21 @@ namespace MusicCore
                     return i;
 
             throw new ArgumentException($"Argument n={n} is too high. There should be at least {n+1} tones");
+        }
+
+        public tone12 FindOrder(int n)
+        {
+            Debug.Assert(this[0]);
+            Debug.Assert(this[n]);
+            int ind = 0;
+            tone12 t = 0;
+            while (t < n)
+            {
+                t = Next(t, 1);
+                ind++;
+            }
+            Debug.Assert(t == n);
+            return ind;
         }
 
         public int Calculate(int k)
@@ -509,17 +399,68 @@ namespace MusicCore
             throw new Exception("There is no root");
         }
 
-        #region Equals, Similar, CoveredBy
-        public bool Equals(TwelveToneSet other)
+        public int ChromaticToDiatonic(int toneChromatic)
         {
-            for (int i = 0; i < TWELVE; i++)
-                if (this[i] != other[i])
-                    return false;
-
-            return true;
+            if (toneChromatic >= 0)
+            {
+                int octaves = toneChromatic / TWELVE;
+                toneChromatic = toneChromatic % TWELVE;
+                return octaves * Count + FindOrder(toneChromatic);
+            }
+            else
+            {
+                int octaves = Math.Abs(toneChromatic / TWELVE) + 1;
+                return ChromaticToDiatonic(toneChromatic + (octaves * TWELVE)) - octaves * Count;
+            }
         }
 
-        public bool Similar(TwelveToneSet other)
+        public int DiatonicToChromatic(int toneDiatonic)
+        {
+            if (toneDiatonic >= 0)
+            {
+                int octaves = toneDiatonic / Count;
+                toneDiatonic = toneDiatonic % Count;
+                int findnth;
+                //todo: This is a workaround for apparent compiler bug
+                int ret = (findnth = FindNth(toneDiatonic)) + octaves * TWELVE;
+                return ret;
+            }
+            else
+            {
+                int octaves = Math.Abs(toneDiatonic / Count) + 1;
+                return DiatonicToChromatic(toneDiatonic + octaves * Count) - octaves * TWELVE;
+            }
+        }
+
+        #region Operators == and !=, Eqauls and GetHashCode
+        public static bool operator ==(TwelveToneSet tts1, TwelveToneSet tts2)
+        {
+            return tts1.tones == tts2.tones;
+        }
+
+        public static bool operator !=(TwelveToneSet tts1, TwelveToneSet tts2)
+        {
+            return tts1.tones != tts2.tones;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is TwelveToneSet tts)
+                return tts.tones == tones;
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return tones;
+        }
+        #endregion
+
+        #region Equals, Similar, CoveredBy
+        public bool Equals(TwelveToneSet other) => tones == other.tones;
+
+        public bool IsSimilar(TwelveToneSet other)
         {
             if (other.Count != this.Count)
                 return false;
@@ -695,6 +636,12 @@ namespace MusicCore
             }
 
             return count;
+        }
+
+        public bool IsInScale(int tone)
+        {
+            tone12 t12 = tone;
+            return IsBitOn(tones, t12);
         }
 
         #region Modifiers

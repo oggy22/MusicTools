@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using MusicCore;
 using NAudio.Midi;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace MusicAnalysisWPF
@@ -31,7 +32,7 @@ namespace MusicAnalysisWPF
                 Dispatcher.Invoke(() => { txt.Text += "File loaded.\r\n"; this.UpdateLayout(); });
 
                 txt.Text += "Analysing...\r\n";
-                var allNodes = ChomskyGrammarAnalysis.Reduce(composition.GetVoices());
+                var allNodes = ChomskyGrammarAnalysis.Reduce(composition.GetVoices(), new List<TwelveToneSet>() { TwelveToneSet.majorScale});
                 txt.Text += $"Analysis finished!\r\n";
 
                 txt.Text += "Post analysis...\r\n";

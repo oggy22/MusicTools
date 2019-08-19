@@ -1,4 +1,6 @@
 ﻿using MusicCore;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,7 +13,11 @@ namespace MusicAnalysisWPF
     /// </summary>
     public partial class MusicalNodeWPF : UserControl
     {
-        public MusicalNodeWPF()
+        private readonly List<string> romanNums = new List<string>()
+            { "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x",
+             "xi", "xii", "xiii", "xiv", "xv", "xvi", "xvii", "xviii", "xix", "xx" };
+
+    public MusicalNodeWPF()
         {
             InitializeComponent();
         }
@@ -58,8 +64,9 @@ namespace MusicAnalysisWPF
             // Populate the first column with pitches [min, max]
             for (int i = max; i >= min; i--)
             {
+                string number = mpl.IsDiatonic ? romanNums[Math.Abs(i)] : i.ToString();
                 Label label = new Label()
-                { Content = $"{i}", VerticalAlignment = VerticalAlignment.Center };
+                { Content = $"{number}", VerticalAlignment = VerticalAlignment.Center };
                 Grid.SetColumn(label, 0);
                 Grid.SetRow(label, max - i);
                 grid.Children.Add(label);

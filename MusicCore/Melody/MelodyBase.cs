@@ -85,6 +85,7 @@ namespace MusicCore
 
         public NoteWithDuration(Fraction duration)
         {
+            Debug.Assert(duration.p > 0);
             note = PAUSE;
             alter = Alteration.Natural;
             this.Duration = duration;
