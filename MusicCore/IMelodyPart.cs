@@ -146,7 +146,7 @@ namespace MusicCore
             }
         }
 
-        public bool IsIdentical(MelodyPartList node) => this.children.SequenceEqual(node.children);
+        public bool IsIdentical(MelodyPartList node) => this.children.SequenceEqual(node.children) && this.IsDiatonic == node.IsDiatonic;
 
         public bool IsLeaf => !GetChildren().Any();
 

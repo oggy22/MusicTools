@@ -16,8 +16,8 @@ namespace MusicCore.Tests
         }
 
         [DataRow(@"Bach_invention_1_Cmajor.mid")]
-        //[DataRow(@"Bach_invention_4_Dminor.mid")]
-        //[DataRow(@"Bach_invention_8_Fmajor.mid")]
+        [DataRow(@"Bach_invention_4_Dminor.mid")]
+        [DataRow(@"Bach_invention_8_Fmajor.mid")]
         [DataRow(@"Bach_invention_10_Gmajor.mid")]
         [DataRow(@"Bach_invention_13_Aminor.mid")]
         //[DataRow(@"Bach_invention_14_Bbmajor.mid")]
