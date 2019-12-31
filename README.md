@@ -9,3 +9,6 @@ Types of repetition:
 - Transposed by number of semitones
 - Within the same scale, but start from a different tone e.g. Albinoni Adagio, Mozart 40th Symphony
 - Within different scales
+
+# Chomsky Analysis Algorithm
+CAA analyzes a single or multiple voices looking for similarities. The output of the analysis is a DAG(Direct Acyclic Graph) where the leafs represented repeating patterns and roots represent voices.
