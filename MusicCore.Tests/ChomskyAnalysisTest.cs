@@ -12,7 +12,7 @@ namespace MusicCore.Tests
         [DataTestMethod]
         public void Albinoni_Adagio(string filename)
         {
-            Test(filename);
+            Test(filename, int.MaxValue, new Fraction(1,8));
         }
 
         [DataRow(@"Bach_invention_1_Cmajor.mid")]
@@ -24,14 +24,14 @@ namespace MusicCore.Tests
         [DataTestMethod]
         public void Bach_inventions(string filename)
         {
-            Test(filename);
+            Test(filename, int.MaxValue, new Fraction(1, 96));
         }
 
         [DataRow(@"Bach_Air_on_G_String_BWV1068.mid")]
-        [DataTestMethod, Ignore]
+        [DataTestMethod]
         public void Bach_Air_on_G_String(string filename)
         {
-            Test(filename);
+            Test(filename, int.MaxValue, new Fraction(1, 24));
         }
 
         [DataRow(@"Mozart_Symphony40_Allegro.mid")]
@@ -41,9 +41,9 @@ namespace MusicCore.Tests
             Test(filename, 2);
         }
 
-        private void Test(string filename, int take = int.MaxValue)
+        private void Test(string filename, int take = int.MaxValue, Fraction? prec = null)
         {
-            var lists = MidiFileReader.Read(filename).GetVoices().Take(take).ToList();
+            var lists = MidiFileReader.Read(filename, prec).GetVoices().Take(take).ToList();
 
             // Save copy
             var copy = FlatCopy(lists);

@@ -65,6 +65,11 @@ namespace MusicCore
             return new Fraction(f.p * n, f.q);
         }
 
+        public static Fraction operator/(Fraction f1, Fraction f2)
+        {
+            return new Fraction(f1.p * f2.q, f1.q * f2.p);
+        }
+
         #region Equals and GetHashCode
         public override bool Equals(object obj)
         {
@@ -95,6 +100,11 @@ namespace MusicCore
         static public implicit operator Fraction(int n)
         {
             return new Fraction(n, 1);
+        }
+
+        public bool IsWhole()
+        {
+            return p % q == 0;
         }
 
         public override string ToString()

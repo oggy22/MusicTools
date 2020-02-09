@@ -1,14 +1,27 @@
-﻿using System.Collections.Generic;
-using NAudio.Midi;
+﻿using NAudio.Midi;
+using System;
 
 namespace MusicCore
 {
     public static class MidiFileReader
     {
-        public static Composition Read(string filename)
+        private static void AddNote(MelodyPartList list, NoteWithDuration nwd, Fraction? prec = null, long absoluteTime = 0)
+        {
+            if (prec != null)
+            {
+                Fraction times = (nwd.Duration / prec.Value);
+                if (!times.IsWhole())
+                    throw new Exception($"Duration of Note {nwd} not divisible by {prec.Value} at absoluteTime={absoluteTime}");
+            }
+
+            list.Add(nwd);
+        }
+
+        public static Composition Read(string filename, Fraction? prec = null)
         {
             MidiFile midi = new MidiFile(filename, true);
             Composition composition = new Composition();
+            int quarterNoteInTicks = midi.DeltaTicksPerQuarterNote;
 
             for (int track = 0; track < midi.Tracks; track++)
             {
@@ -20,14 +33,16 @@ namespace MusicCore
                         if (noteonevent.OffEvent != null)
                         {
                             if (noteonevent.DeltaTime > 0)
-                                list.Add(new NoteWithDuration(new Fraction(noteonevent.DeltaTime, 120)));
+                                AddNote(list, new NoteWithDuration(new Fraction(noteonevent.DeltaTime, quarterNoteInTicks)), prec, noteonevent.AbsoluteTime);
 
-                            list.Add(
+                            AddNote(
+                                list,
                                 new NoteWithDuration(
                                     noteonevent.NoteNumber,
                                     Alteration.Natural,
-                                    new Fraction(noteonevent.NoteLength, 120)));
-
+                                    new Fraction(noteonevent.NoteLength, quarterNoteInTicks)),
+                                prec,
+                                noteonevent.AbsoluteTime);
                         }
                     }
                     else
