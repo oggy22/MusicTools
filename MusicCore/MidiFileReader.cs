@@ -45,9 +45,10 @@ namespace MusicCore
                                 noteonevent.AbsoluteTime);
                         }
                     }
-                    else
+                    else if (midievent is TempoEvent tempoevent)
                     {
-
+                        if (composition.millisecondsPerNote == null)
+                            composition.millisecondsPerNote = tempoevent.MicrosecondsPerQuarterNote / 1000;
                     }
                 }
 

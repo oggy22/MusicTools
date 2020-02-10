@@ -12,7 +12,7 @@ namespace MusicCore
     /// </summary>
     public class Composition
     {
-        public readonly int tempo;
+        public int? millisecondsPerNote;
         public readonly int beatCount;
 
         struct Voice
@@ -44,14 +44,15 @@ namespace MusicCore
             mpls.Add(new Voice(mpl, offset));
         }
 
-        public void PlayBack(MidiOut midiOut)
+        public void PlayBack(MidiOut midiOut, int milliSecondsPerNote)
         {
             PlayBack(
                 note => midiOut.Send(MidiMessage.StartNote(note, 100, 1).RawData),
-                    note => midiOut.Send(MidiMessage.StopNote(note, 100, 1).RawData));
+                note => midiOut.Send(MidiMessage.StopNote(note, 100, 1).RawData),
+                milliSecondsPerNote);
         }
 
-        public void PlayBack(Action<int> playNote, Action<int> stopNote, bool IncludeDurations = true)
+        public void PlayBack(Action<int> playNote, Action<int> stopNote, int milliSecondsPerNote)
         {
             List<MelodyPartList> mpls = GetVoices().ToList();
             var iterators = mpls.Select(mpl =>
@@ -74,8 +75,8 @@ namespace MusicCore
                 iterators.ForEach(it => min = Fraction.Min(min, it.durLeft));
 
                 Console.WriteLine(min);
-                if (IncludeDurations)
-                    Thread.Sleep((int)(200 * min));
+                if (milliSecondsPerNote > 0)
+                    Thread.Sleep((int)(milliSecondsPerNote * min));
 
                 // Update durations
                 iterators.ForEach(it =>

@@ -30,7 +30,7 @@ namespace MusicCore.Tests
                     tones[note]--;
                     Assert.IsTrue(tones[note] >= 0);
                 },
-                IncludeDurations: false
+                0
                 );
 
             // At the end all tones are released

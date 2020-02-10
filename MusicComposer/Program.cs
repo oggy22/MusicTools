@@ -100,7 +100,9 @@ namespace MusicComposer
                         midiOut.Send(MidiMessage.StartNote(note, 100, 1).RawData);
                         midiOut.Send(MidiMessage.StartNote(note+4, 100, 1).RawData);
                     },
-                    note => midiOut.Send(MidiMessage.StopNote(note, 100, 1).RawData));
+                    note => midiOut.Send(MidiMessage.StopNote(note, 100, 1).RawData),
+                    500
+                    );
 
                 return;
             }

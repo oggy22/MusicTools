@@ -78,6 +78,7 @@ namespace MusicCore
 
     public class MelodyPartList
     {
+        public bool Changed { get; private set; }
         public bool IsDiatonic;
         internal List<IMelodyPart> children = new List<IMelodyPart>();
         public int Count => children.Count;
@@ -129,6 +130,9 @@ namespace MusicCore
                 else
                     Debug.Fail("Unrecognized part");
             }
+
+            if (Changed)
+                st += " (CHANGED)";
 
             return st;
         }
@@ -208,5 +212,52 @@ namespace MusicCore
                 else Debug.Fail($"unrecognized {melodyPart}");
             }
         }
+
+        public void ReshuffleNoteBlocks()
+        {
+            const int outside = -1;
+            int start = outside;
+            int i;
+            for (i=0; i<children.Count; i++)
+            {
+                if (children[i] is NoteWithDuration)
+                {
+                    if (start == outside)
+                        start = i;
+                }
+                else
+                {
+                    if (start != outside)
+                        ReshuffleRegion(start, i - start);
+                }
+            }
+            if (start != outside)
+                ReshuffleRegion(start, i - start);
+
+            Changed = true;
+        }
+
+        private void ReshuffleRegion(int first, int length)
+        {
+            if (length < 2)
+                return;
+
+            var random = new System.Random(0);
+            for (int i = 0; i<length; i++)
+            {
+                int j = random.Next(i, first + length);
+                if (i == j)
+                    continue;
+
+                var temp = children[i];
+                children[i] = children[j];
+                children[j] = temp;
+            }
+        }
+    }
+
+    class Permutation
+    {
+
     }
 }

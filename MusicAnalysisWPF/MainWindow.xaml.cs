@@ -2,7 +2,9 @@
 using MusicCore;
 using NAudio.Midi;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Data;
 
 namespace MusicAnalysisWPF
 {
@@ -65,13 +67,68 @@ namespace MusicAnalysisWPF
         
         private void BtnPlay_Click(object sender, RoutedEventArgs e)
         {
-            composition.PlayBack(midiOut);
+            composition.PlayBack(midiOut, composition.millisecondsPerNote.Value);
             //todo: make it asynchronous
         }
 
-        private void BtnStop_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
+            Application.Current.Shutdown();
+        }
 
+        private void MenuItem_Reshuffle_notes(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in selection)
+            {
+                item.ReshuffleNoteBlocks();
+            }
+
+            ICollectionView view = CollectionViewSource.GetDefaultView(listView.ItemsSource);
+            view.Refresh();
+        }
+
+        HashSet<MelodyPartList> selection = new HashSet<MelodyPartList>();
+
+        private void MenuItem_All_leafs(object sender, RoutedEventArgs e)
+        {
+            selection = new HashSet<MelodyPartList>();
+            foreach (var item in listView.ItemsSource)
+            {
+                MelodyPartList mpl = item as MelodyPartList;
+                if (mpl.IsLeaf)
+                    selection.Add(mpl);
+            }
+        }
+
+        private void MenuItem_All_nodes(object sender, RoutedEventArgs e)
+        {
+            selection = new HashSet<MelodyPartList>();
+            foreach (var item in listView.ItemsSource)
+            {
+                MelodyPartList mpl = item as MelodyPartList;
+                selection.Add(mpl);
+            }
+        }
+
+        private void MenuItem_All_roots(object sender, RoutedEventArgs e)
+        {
+            selection = new HashSet<MelodyPartList>(composition.GetVoices());
+        }
+
+        private void MenuItem_All_none_leafs(object sender, RoutedEventArgs e)
+        {
+            selection = new HashSet<MelodyPartList>();
+            foreach (var item in listView.ItemsSource)
+            {
+                MelodyPartList mpl = item as MelodyPartList;
+                if (mpl.IsLeaf)
+                    selection.Add(mpl);
+            }
+        }
+
+        private void MenuItem_About(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Music Analyzer by Ognjen Sobajic\nFeb 2020");
         }
     }
 }
