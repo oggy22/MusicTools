@@ -17,7 +17,7 @@ namespace MusicAnalysisWPF
             { "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x",
              "xi", "xii", "xiii", "xiv", "xv", "xvi", "xvii", "xviii", "xix", "xx" };
 
-    public MusicalNodeWPF()
+        public MusicalNodeWPF()
         {
             InitializeComponent();
         }
@@ -26,6 +26,10 @@ namespace MusicAnalysisWPF
 
         public void Present(MelodyPartList mpl)
         {
+            // unsubscribe the previous mpl
+            if (this.mpl != null)
+                this.mpl.noteTriggered -= Mpl_noteTriggered;
+
             this.mpl = mpl;
 
             // Clear the grid content
@@ -89,13 +93,56 @@ namespace MusicAnalysisWPF
 
                 // Duration part in the last row
                 Label lblDur = new Label()
-                { Content = nwd.Duration, HorizontalAlignment = HorizontalAlignment.Center };
+                { Content = nwd.Duration, HorizontalAlignment = HorizontalAlignment.Center, Background = Brushes.White };
                 Grid.SetColumn(lblDur, iColumn + 1);
                 Grid.SetRow(lblDur, max - min + 1);
                 grid.Children.Add(lblDur);
 
                 iColumn++;
             }
+
+            sgrid = grid;
+            mpl.noteTriggered += Mpl_noteTriggered;
+            mpl.GetNotes().ToList();
+        }
+
+        static Grid sgrid; //kludge
+
+        private static void Mpl_noteTriggered(int note)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                int lastRow = sgrid.RowDefinitions.Count - 1;
+                
+                // Color each label to blue
+                foreach (UIElement uie in sgrid.Children)
+                {
+                    if (Grid.GetColumn(uie) == 0 || Grid.GetRow(uie) == lastRow)
+                        continue;
+
+                    Label label = uie as Label;
+
+                    label.Background = Brushes.Blue;
+                }
+
+                // -1 signals end
+                if (note == -1)
+                    return;
+
+                // Color the current note to red
+                foreach (UIElement uie in sgrid.Children)
+                {
+                    int column = Grid.GetColumn(uie);
+                    int row = Grid.GetRow(uie);
+                    
+                    if (column == note + 1 && row != lastRow)
+                    {
+                        Label label = uie as Label;
+                        label.Background = Brushes.Red;
+                        return;
+                    }
+                }
+            }));
         }
     }
 }

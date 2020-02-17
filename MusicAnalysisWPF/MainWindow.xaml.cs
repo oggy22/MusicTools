@@ -1,8 +1,10 @@
 ﻿using Microsoft.Win32;
 using MusicCore;
 using NAudio.Midi;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 
@@ -18,7 +20,7 @@ namespace MusicAnalysisWPF
             InitializeComponent();
         }
 
-        private void BtnOpen_Click(object sender, RoutedEventArgs e)
+        private void MenuOpen_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Midi Files|*.mid";
@@ -64,14 +66,29 @@ namespace MusicAnalysisWPF
         }
 
         static MidiOut midiOut = new MidiOut(0);
-        
-        private void BtnPlay_Click(object sender, RoutedEventArgs e)
+        bool isPlaying = false;
+        private async void MenuItemPlayPause_Click(object sender, RoutedEventArgs e)
         {
-            composition.PlayBack(midiOut, composition.millisecondsPerNote.Value);
-            //todo: make it asynchronous
+            if (isPlaying)
+            {
+                isPlaying = false;
+                return;
+            }
+
+            MenuItemStop.IsEnabled = true;
+            isPlaying = true;
+            await Task.Run(() =>
+            {
+                composition.PlayBack(midiOut, composition.millisecondsPerNote.Value);
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    MenuItemStop.IsEnabled = false;
+                }));
+                isPlaying = false;
+            });
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void MenuItemExit_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
@@ -129,6 +146,12 @@ namespace MusicAnalysisWPF
         private void MenuItem_About(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Music Analyzer by Ognjen Sobajic\nFeb 2020");
+        }
+
+        private void MenuItemStop_Click(object sender, RoutedEventArgs e)
+        {
+            composition.StopPlaybak();
+            MenuItemStop.IsEnabled = false;
         }
     }
 }

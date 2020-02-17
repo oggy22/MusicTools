@@ -44,6 +44,7 @@ namespace MusicCore
             mpls.Add(new Voice(mpl, offset));
         }
 
+        #region  PlayBack and related
         public void PlayBack(MidiOut midiOut, int milliSecondsPerNote)
         {
             PlayBack(
@@ -68,8 +69,21 @@ namespace MusicCore
                 return new Iterator(enumerator, enumerator.Current.Duration);
             }).ToList();
 
+            stopSignal = false;
+
             do
             {
+                if (stopSignal)
+                {
+                    // Update durations
+                    iterators.ForEach(it =>
+                    {
+                        if (!it.Current.IsPause)
+                            stopNote(it.Current.note);
+                    });
+                    return;
+                }
+
                 // Find the shortest note left to play
                 Fraction min = new Fraction(int.MaxValue, 1);
                 iterators.ForEach(it => min = Fraction.Min(min, it.durLeft));
@@ -101,6 +115,12 @@ namespace MusicCore
             } while (iterators.Count > 0);
         }
 
+        private bool stopSignal = false;
+        public void StopPlaybak()
+        {
+            stopSignal = true;
+        }
+
         /// <summary>
         /// Used to iterate over notes in playback
         /// </summary>
@@ -127,5 +147,6 @@ namespace MusicCore
             public NoteWithDuration Current => enumerator.Current;
             public int note => Current.note;
         };
+        #endregion
     }
 }

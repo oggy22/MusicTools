@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using System;
 
 namespace MusicCore
 {
@@ -65,9 +66,8 @@ namespace MusicCore
 
         public virtual IEnumerable<NoteWithDuration> GetNotes()
         {
-            foreach (var part in node.children)
-                foreach (var note in part.GetNotes())
-                    yield return note + offset;
+            foreach (var note in node.GetNotes())
+                yield return note + offset;
         }
 
         public void PlayRecursive(int offset)
@@ -161,11 +161,20 @@ namespace MusicCore
 
         public int RecursiveCount => GetNotes().Count();
 
+        public event Action<int> noteTriggered = delegate { };
+
         public IEnumerable<NoteWithDuration> GetNotes()
         {
+            int i = 0;
+
             foreach (var mp in this.children)
                 foreach (var note in mp.GetNotes())
+                {
+                    noteTriggered(i++);
                     yield return note;
+                }
+
+            noteTriggered(-1);
         }
 
         public int TotalOccurances { get; set; }
