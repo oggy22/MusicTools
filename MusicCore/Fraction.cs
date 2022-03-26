@@ -17,6 +17,17 @@ namespace MusicCore
             this.q = q / gcd;
         }
 
+        static public Fraction Parse(string s)
+        {
+            int slashIndex = s.IndexOf('/');
+            if (slashIndex == -1)
+                return new Fraction(int.Parse(s), 1);
+
+            int p = int.Parse(s.Substring(0, slashIndex));
+            int q = int.Parse(s.Substring(slashIndex + 1));
+            return new Fraction(p, q);
+        }
+
         static public int GCD(int a, int b)
         {
             if (b == 0)

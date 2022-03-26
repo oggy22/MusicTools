@@ -23,7 +23,7 @@ namespace MusicAnalysisWPF
         private void MenuOpen_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Midi Files|*.mid";
+            openFileDialog.Filter = "Midi Files|*.mid|Melody Files|*.csv";
             openFileDialog.Title = "Select a Midi File";
 
             if (openFileDialog.ShowDialog().Value)
@@ -32,7 +32,7 @@ namespace MusicAnalysisWPF
 
                 //todo: using Dispatcher.Invoke doesn't work
                 Dispatcher.Invoke(() => { txt.Text += $"File {filename} loading...\r\n"; });
-                composition = MidiFileReader.Read(filename);
+                composition = filename.EndsWith(".mid") ? MidiFileReader.Read(filename) : CSVReader.Read(filename);
                 Dispatcher.Invoke(() => { txt.Text += "File loaded.\r\n"; this.UpdateLayout(); });
 
                 txt.Text += "Analysing...\r\n";

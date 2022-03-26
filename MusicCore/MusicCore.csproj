@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="ChomskyGrammarAnalysis.cs" />
     <Compile Include="Composition.cs" />
+    <Compile Include="CSVReader.cs" />
     <Compile Include="Fraction.cs" />
     <Compile Include="IMelodyPart.cs" />
     <Compile Include="Instruments\Instrument.cs" />
